@@ -1,0 +1,13 @@
+"AddonInfo"
+{
+	"name" "ragdoll breaker tool"
+	"author_name" "Author Name"
+	"info" "{
+	"description": "Description",
+	"type": "tool",
+	"tags": [
+		"build",
+		"scenic"
+	]
+}"
+}
