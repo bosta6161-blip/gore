@@ -106,6 +106,7 @@ hook.Add("PreCleanupMap", "Ragdoll_GibsCleanup", function()
 end)
 
 hook.Add("HUDPaint", "DrawBonePositions", function()
+	if GetConVar("gore_debug"):GetBool() then
     for _, ragdoll in ipairs(ents.GetAll()) do
 		if ragdoll.is_a_ragdoll_gib then  
 
@@ -132,4 +133,5 @@ hook.Add("HUDPaint", "DrawBonePositions", function()
 		end
 	end
     end
+	end
 end)

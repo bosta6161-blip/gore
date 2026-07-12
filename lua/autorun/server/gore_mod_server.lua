@@ -1,4 +1,5 @@
 CreateConVar("gore_enable", "1", FCVAR_ARCHIVE, "gore_enable")
+CreateConVar("gore_debug", "0", FCVAR_ARCHIVE, "gore_debug")
 CreateConVar("gib_fade_time", "30", FCVAR_ARCHIVE, "gib_fade_time") 
 CreateConVar("sliced_ragdoll_fade_time", "30", FCVAR_ARCHIVE, "sliced_ragdoll_fade_time") 
 CreateConVar("cannibalism", "1", FCVAR_ARCHIVE, "cannibalism")

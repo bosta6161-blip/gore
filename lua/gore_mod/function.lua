@@ -120,12 +120,13 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
 			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
 		end
-		ForcePhysBonePos2(ragdoll)
+		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
+		/*
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
 			end
-		end)
+		end)*/
 	end
 end 
 
@@ -194,14 +195,20 @@ hook.Add("Think", "ForcePhysbonePositions_Think_sigma", function()
 		if ragdoll.gib_bone then
 			ForcePhysBonePos(ragdoll) 
 		end
-		/*
-		if ragdoll.slice_gib then
-			ForcePhysBonePos2(ragdoll) 
-		end
-		*/
 
 	end
 end)
+timer.Create( "limb_bone_timer",0.5, 0, function() 
+	--print("inside") 
+	for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
+		if not ragdoll:IsValid() then
+			table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
+		end
+		if ragdoll.slice_gib then
+			ForcePhysBonePos2(ragdoll) 
+		end
+	end
+end )
 function ForcePhysBonePos(ragdoll)
 	for k, v in pairs(ragdoll.gib_bone) do
 		local bone = ragdoll:TranslateBoneToPhysBone(k)
@@ -218,11 +225,11 @@ function ForcePhysBonePos2(ragdoll)
 		local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 		if IsValid(phys) and ragdoll.slice_gib[boneid] ~= boneid then
-			local main_bone = ragdoll:TranslateBoneToPhysBone(0)
+			local main_bone = ragdoll:TranslateBoneToPhysBone(ragdoll.main_bone_sigma)
 		
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone)
-			gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
+			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0, 200 ),true)
 		end
 	end
 end
