@@ -12,26 +12,29 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
 end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
     if owner.is_madness_combat_npc == true then return end
-   
+    local dmg_data = {
+        dmg_type = owner.dmg_type,
+        dmg_pos = owner.dmg_pos,
+        dmg_force = owner.dmg_force,
+        slice = false 
+    }
     if GetConVar("gore_enable"):GetBool() then
-        local dmg_data = {
-            dmg_type = owner.dmg_type,
-            dmg_pos = owner.dmg_pos,
-            dmg_force = owner.dmg_force,
-            slice = false 
-        }
-        local damageForce = dmg_data.dmg_force:Length()
-        if damageForce > 1200 then
-            local hit = GetClosestPhysBone(ragdoll,dmg_data.dmg_pos)
-            local bone = ragdoll:TranslatePhysBoneToBone(hit)
-            local bone_name = ragdoll:GetBoneName( bone ) 	
-            if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
-                dmg_data.slice = true 
+        if dmg_data.dmg_type == 64 then
+            gib_ragdolll(ragdoll,dmg_data.dmg_force)
+        else
+            local damageForce = dmg_data.dmg_force:Length()
+            if damageForce > 1200 then
+                local hit = GetClosestPhysBone(ragdoll,dmg_data.dmg_pos)
+                local bone = ragdoll:TranslatePhysBoneToBone(hit)
+                local bone_name = ragdoll:GetBoneName( bone ) 	
+                if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
+                    dmg_data.slice = true 
+                end
+                dismember_limb(ragdoll,bone_name,dmg_data) 
             end
-            dismember_limb(ragdoll,bone_name,dmg_data) 
+            ragdoll.destructible_Corpse = true 
+            ragdoll.gib_start_delay = CurTime() + 1
         end
-        ragdoll.destructible_Corpse = true 
-        ragdoll.gib_start_delay = CurTime() + 1
     end
 end)
 

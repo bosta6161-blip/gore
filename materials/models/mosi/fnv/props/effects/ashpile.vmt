@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/mosi/fnv/props/effects/dustpile"
+    "$bumpmap"     "models/mosi/fnv/props/effects/dustpile_n"
+	"$halflambert" 1
+	
+	"$alphatest" 1
+	"$allowalphatocoverage" 1
+}

@@ -14,7 +14,7 @@ function GetClosestPhysBone(ragdoll,pos)
 	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
 		local bone = ragdoll:TranslatePhysBoneToBone(i)
 		
-		if bone and ragdoll.gib_bone[bone] ~= bone then 
+		if bone and ragdoll.gib_bone[i] ~= i then 
 			local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 			if IsValid(phys) and pos then
@@ -46,17 +46,18 @@ function gib_PhysBone(ragdoll,bone_name,dmg_data)
     if !ragdoll.gib_bone then ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll) end
 
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-	if dmg_data.slice == false then
-		hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
-	end
-    ragdoll:ManipulateBoneScale(bone_id,Vector(0,0,0)) --scale the bone
+
+	ragdoll:ManipulateBoneScale(bone_id,Vector(0,0,0)) --scale the bone
     local PhysBone = ragdoll:TranslateBoneToPhysBone(bone_id)
     local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
 			
-    if ObjectNum:IsValid() and ragdoll.gib_bone[bone_id] ~= bone_id then --check if the object is valid
+	if dmg_data.slice == false and ragdoll.gib_bone[PhysBone] ~= PhysBone then
+		hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
+	end
+    if ObjectNum:IsValid() and ragdoll.gib_bone[PhysBone] ~= PhysBone then --check if the object is valid
         ragdoll:RemoveInternalConstraint(PhysBone)
-        ragdoll.gib_bone[bone_id] = bone_id
-		print(bone_name.."is gib")
+        ragdoll.gib_bone[PhysBone] = PhysBone
+		print(PhysBone.."is gib")
         colideBone(ragdoll,PhysBone)
     end
     local children = ragdoll:GetChildBones(bone_id)
@@ -215,9 +216,8 @@ timer.Create( "limb_bone_timer",0.5, 0, function()
 	end
 end )
 function ForcePhysBonePos(ragdoll)
-	for k, v in pairs(ragdoll.gib_bone) do
-		local bone = ragdoll:TranslateBoneToPhysBone(k)
-		local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(k ))
+	for bone, v in pairs(ragdoll.gib_bone) do
+		local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(ragdoll:TranslatePhysBoneToBone(bone)))
 		local gibbed_physobj = ragdoll:GetPhysicsObjectNum(bone)
 		local parent_physobj = ragdoll:GetPhysicsObjectNum(bone_parent)
 		gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
@@ -226,7 +226,9 @@ function ForcePhysBonePos(ragdoll)
 end
 function ForcePhysBonePos2(ragdoll)
 	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
+
 		local boneid = ragdoll:TranslatePhysBoneToBone(i)
+
 		local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 		if IsValid(phys) and ragdoll.slice_gib[boneid] ~= boneid then
@@ -237,6 +239,33 @@ function ForcePhysBonePos2(ragdoll)
 			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0, 200 ),true)
 		end
 	end
+end
+function gib_ragdolll(ragdoll,force)
+	if !ragdoll.gib_bone then
+		ragdoll.gib_bone = {}
+	end
+	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
+		local boneid = ragdoll:TranslatePhysBoneToBone(i)
+		local bone_name = ragdoll:GetBoneName(boneid)
+		local phys = ragdoll:GetPhysicsObjectNum(i)
+		
+		if force == nil then
+			force = Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250))
+		end
+
+		local dmg_data = {
+            dmg_force = force/2
+        }
+		if ragdoll.gib_bone[i] ~= i then
+			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
+		end
+	end
+	local bloodeffect = EffectData()
+	bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
+	bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
+	bloodeffect:SetScale(50)
+	util.Effect("VJ_Blood1",bloodeffect)
+	ragdoll:Remove()
 end
 function bonemerge_prop(ragdoll,model)
 	local npc_model = ragdoll:GetModel()

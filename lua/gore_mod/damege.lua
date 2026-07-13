@@ -25,7 +25,11 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                     dmg_data.slice = true 
                 end
                 PrintMessage(3,bone_name)
-                dismember_limb(ragdoll,bone_name,dmg_data) 
+                if ragdoll:LookupBone(bone_name) == 0 then
+                    gib_ragdolll(ragdoll)    
+                else
+                    dismember_limb(ragdoll,bone_name,dmg_data) 
+                end
             end
 		end 
 	end

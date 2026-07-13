@@ -1,0 +1,23 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/Red Menace/MKX/Gore/Male_ER_FatalityGuts_Diff"
+	"$bumpmap" "models/Red Menace/MKX/Gore/Male_ER_FatalityGuts_Norm"
+
+	$halflambert 1
+	
+	$nocull 1
+	
+	$lightwarptexture "models\vindictus\shared\lightwarp_flesh"
+
+	$phong 1
+	$phongexponenttexture	"models\vindictus\shared\albedo_tintdefine"
+	$phongalbedotint 1
+	$phongexponent 7
+	$phongboost 5
+	$phongfresnelranges "[1.5 2.5 12.0]"
+	
+	
+	$rimlight 1 
+	$rimlightexponent 20
+	$rimlightboost 1
+}

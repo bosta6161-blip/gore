@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/mosi/fnv/props/gore/handymeatcap"
+    "$bumpmap"     "models/mosi/fnv/props/gore/handymeatcap_n"
+	"$alphatest" 1
+	"$allowalphatocoverage" 1
+
+	"$phong" "1"
+	"$phongexponent" "1"
+	"$phongboost" ".1"
+	"$phongfresnelranges"	"[.5 .25 0]"
+}

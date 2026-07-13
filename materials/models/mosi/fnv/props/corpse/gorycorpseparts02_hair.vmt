@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/mosi/fnv/props/corpse/gorycorpseparts02"
+    "$bumpmap"     "models/mosi/fnv/props/corpse/gorycorpseparts02_n"
+	"$translucent" 1
+	"$halflambert" 1
+}

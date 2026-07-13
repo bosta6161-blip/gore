@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/mosi/fnv/props/corpse/gorycorpseparts01"
+    "$bumpmap"     "models/mosi/fnv/props/corpse/gorycorpseparts01_n"
+
+	"$phong" "1"
+	"$phongexponent" "2"
+	"$phongboost" ".5"
+	"$phongfresnelranges"	"[.5 .25 0]"
+	"$phongtint" "[1 .7 .7]"
+}

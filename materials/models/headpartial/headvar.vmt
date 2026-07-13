@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\headpartial\headvar"
+	"$bumpmap"		"models\headpartial\headvarnormal"
+	"$model"		1
+}

@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$baseTexture" "models/mosi/fnv/props/effects/goopile"
+    "$bumpmap"     "models/mosi/fnv/props/effects/goopile_n"
+	
+	"$alphatest" 1
+	"$allowalphatocoverage" 1
+}
