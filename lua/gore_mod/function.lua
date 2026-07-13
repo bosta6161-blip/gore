@@ -4,15 +4,18 @@ gore_mod_slice_damege = {
 	4,
 	1024
 }
-function GetClosestPhysBone(ent,pos)
+function GetClosestPhysBone(ragdoll,pos)
 	local closest_distance = -1
 	local closest_bone = -1
-	
-	for i=0, ent:GetPhysicsObjectCount()-1 do
-		local bone = ent:TranslatePhysBoneToBone(i)
+
+	if !ragdoll.gib_bone then
+		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+	end
+	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
+		local bone = ragdoll:TranslatePhysBoneToBone(i)
 		
-		if bone then 
-			local phys = ent:GetPhysicsObjectNum(i)
+		if bone and ragdoll.gib_bone[bone] ~= bone then 
+			local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 			if IsValid(phys) and pos then
 				local distance = phys:GetPos():Distance(pos)
@@ -50,9 +53,10 @@ function gib_PhysBone(ragdoll,bone_name,dmg_data)
     local PhysBone = ragdoll:TranslateBoneToPhysBone(bone_id)
     local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
 			
-    if ObjectNum:IsValid() then --check if the object is valid
+    if ObjectNum:IsValid() and ragdoll.gib_bone[bone_id] ~= bone_id then --check if the object is valid
         ragdoll:RemoveInternalConstraint(PhysBone)
         ragdoll.gib_bone[bone_id] = bone_id
+		print(bone_name.."is gib")
         colideBone(ragdoll,PhysBone)
     end
     local children = ragdoll:GetChildBones(bone_id)
@@ -120,6 +124,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
 			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
 		end
+
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
 		/*
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()

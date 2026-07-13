@@ -30,8 +30,11 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             end
             dismember_limb(ragdoll,bone_name,dmg_data) 
         end
+        ragdoll.destructible_Corpse = true 
+        ragdoll.gib_start_delay = CurTime() + 1
     end
 end)
 
 include( "gore_mod/function.lua" )
+include( "gore_mod/damege.lua" )
 include( "gore_mod/hook.lua" )
