@@ -127,12 +127,12 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end
 
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
-		/*
+	
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
 			end
-		end)*/
+		end)
 	end
 end 
 
@@ -293,6 +293,7 @@ end )
 function dismember_limb(ragdoll,bone_name,dmg_data)
 	gib_PhysBone(ragdoll,bone_name,dmg_data)
 	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
+
 	if dmg_data.slice == true then
 		decap_ragdoll(ragdoll,bone_name,dmg_data)
 	end

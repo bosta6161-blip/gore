@@ -84,8 +84,9 @@ function SetRagdollPos69(ent,ent2)
 	
 end
 function GibCallback(myself, boneCount)
-	if not myself.main_bone:IsValid() then
+	if not myself:GetParent():IsValid() then
 		myself:Remove()
+		print("aids")
 	end
     for i = 0, boneCount - 1 do
         if myself.slice_gib[i] ~= i then
