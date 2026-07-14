@@ -24,9 +24,11 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
                     dmg_data.slice = true 
                 end
-                PrintMessage(3,bone_name)
-                if ragdoll:LookupBone(bone_name) == 0 then
-                    gib_ragdolll(ragdoll)    
+
+                if bone == 0 then
+                    gib_ragdolll(ragdoll,dmg_data.dmg_force)    
+                elseif ragdoll.main_bone_sigma == bone then
+                    gib_ragdolll2(ragdoll,dmg_data.dmg_force)
                 else
                     dismember_limb(ragdoll,bone_name,dmg_data) 
                 end

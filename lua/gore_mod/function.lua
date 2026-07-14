@@ -1,6 +1,7 @@
 util.AddNetworkString( "noob_gore_sigma_matrix" )
 util.AddNetworkString( "noob_gore_benemerge" )
 gore_mod_slice_damege = {
+	1,
 	4,
 	1024
 }
@@ -57,7 +58,7 @@ function gib_PhysBone(ragdoll,bone_name,dmg_data)
     if ObjectNum:IsValid() and ragdoll.gib_bone[PhysBone] ~= PhysBone then --check if the object is valid
         ragdoll:RemoveInternalConstraint(PhysBone)
         ragdoll.gib_bone[PhysBone] = PhysBone
-		print(PhysBone.."is gib")
+		--print(PhysBone.."is gib")
         colideBone(ragdoll,PhysBone)
     end
     local children = ragdoll:GetChildBones(bone_id)
@@ -125,9 +126,22 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
 			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
 		end
-
+		ragdollGIB.gib_bone = {}
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
-	
+		for phys, v in pairs(ragdoll.gib_bone) do
+			local boneid = ragdoll:TranslatePhysBoneToBone(phys)
+			local bone_name2 = ragdoll:GetBoneName(boneid)
+			local main_bone = ragdollGIB:TranslateBoneToPhysBone(ragdollGIB.main_bone_sigma)
+			if phys ~= main_bone then
+							print(bone_name2)
+				local dmg_data = {
+                	slice = true  
+            	}
+				gib_PhysBone(ragdollGIB,bone_name2,dmg_data)
+				hook.Call( "noob_gore_gap", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name2) --call this hook to make cap based on bone name
+			end
+		end
+
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
@@ -259,12 +273,35 @@ function gib_ragdolll(ragdoll,force)
 		if ragdoll.gib_bone[i] ~= i then
 			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
 		end
+
 	end
 	local bloodeffect = EffectData()
 	bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
 	bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
 	bloodeffect:SetScale(50)
 	util.Effect("VJ_Blood1",bloodeffect)
+	ragdoll:Remove()
+end
+function gib_ragdolll2(ragdoll,force)
+	if !ragdoll.slice_gib then
+		ragdoll.slice_gib = {}
+	end
+	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
+		local boneid = ragdoll:TranslatePhysBoneToBone(i)
+		local bone_name = ragdoll:GetBoneName(boneid)
+		local phys = ragdoll:GetPhysicsObjectNum(i)
+		
+		if force == nil then
+			force = Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250))
+		end
+
+		local dmg_data = {
+            dmg_force = force/2
+        }
+		if ragdoll.slice_gib[boneid] == boneid then
+			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
+		end
+	end
 	ragdoll:Remove()
 end
 function bonemerge_prop(ragdoll,model)
@@ -291,10 +328,11 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
     PrintTable(gib_PhysBone_RAGDOLLS)
 end )
 function dismember_limb(ragdoll,bone_name,dmg_data)
-	gib_PhysBone(ragdoll,bone_name,dmg_data)
-	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 
 	if dmg_data.slice == true then
 		decap_ragdoll(ragdoll,bone_name,dmg_data)
 	end
+	gib_PhysBone(ragdoll,bone_name,dmg_data)
+	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
+
 end

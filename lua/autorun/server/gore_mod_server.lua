@@ -1,4 +1,5 @@
 CreateConVar("gore_enable", "1", FCVAR_ARCHIVE, "gore_enable")
+CreateConVar("can_gib_only_npc_corpse", "0", FCVAR_ARCHIVE, "can_gib_only_npc_corpse")
 CreateConVar("gore_debug", "0", FCVAR_ARCHIVE, "gore_debug")
 CreateConVar("gib_fade_time", "30", FCVAR_ARCHIVE, "gib_fade_time") 
 CreateConVar("sliced_ragdoll_fade_time", "30", FCVAR_ARCHIVE, "sliced_ragdoll_fade_time") 
@@ -37,7 +38,24 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
         end
     end
 end)
-
+function ApplyCorpseEffects(ragdoll)
+	ragdoll.destructible_Corpse = true
+	ragdoll.gib_start_delay = CurTime() + 1
+	ragdoll:CallOnRemove("Remove_ragdoll_from_the_table_shit", function()
+        table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
+    end)
+end
+hook.Add("OnEntityCreated", "On_shit_ent_is_created", function(ragdoll)
+    if GetConVar("gore_enable"):GetBool() then 
+		if GetConVar("can_gib_only_npc_corpse"):GetBool() == false and ragdoll:GetClass() == "prop_ragdoll" then 
+			timer.Simple(0, function()
+				if IsValid(ragdoll) and not ragdoll.destructible_Corpse then
+					ApplyCorpseEffects(ragdoll) 
+				end
+			end)
+		end
+	end
+end)
 include( "gore_mod/function.lua" )
 include( "gore_mod/damege.lua" )
 include( "gore_mod/hook.lua" )
