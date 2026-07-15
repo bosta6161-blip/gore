@@ -26,7 +26,8 @@ bone_name_togib = {
 	["ValveBiped.Bip01_R_Foot"] = "models/mosi/fnv/props/gore/goreleg01.mdl",
 	["ValveBiped.Bip01_L_Foot"] = "models/mosi/fnv/props/gore/goreleg01.mdl",
 	["ValveBiped.Bip01_Spine4"] = "models/mosi/fnv/props/gore/goretorso03.mdl",
-    ["ValveBiped.Bip01_Spine2"] = "models/gore/uppertorso_boneslowerleft.mdl"
+    ["ValveBiped.Bip01_Pelvis"] = "models/gore/pelvis.mdl",
+    ["ValveBiped.Bip01_Spine2"] = "models/gore/uppertorso.mdl"
 } 
 hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_name,dmg_data)
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name

@@ -26,9 +26,9 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 end
 
                 if bone == 0 then
-                    gib_ragdolll(ragdoll,dmg_data.dmg_force)    
+                    gib_ragdolll(ragdoll,dmg_data.dmg_force,true )    
                 elseif ragdoll.main_bone_sigma == bone then
-                    gib_ragdolll2(ragdoll,dmg_data.dmg_force)
+                    gib_ragdolll(ragdoll,dmg_data.dmg_force)
                 else
                     dismember_limb(ragdoll,bone_name,dmg_data) 
                 end

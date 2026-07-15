@@ -12,8 +12,9 @@ function ENT:Initialize()
     local phys = self:GetPhysicsObject()
 	
 	self:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
-	self:SetHealth(40)
+	self.gib_Health = 40
 	self.damage_Start_delay = CurTime() + 1
+	self.fucked = false  
 end
 function ENT:Use(ply) 
 	local Position = ply:GetEyeTrace()
@@ -52,8 +53,9 @@ function ENT:OnTakeDamage( dmginfo )
 	if CurTime() > self.damage_Start_delay then
 		local dmg_pos = dmginfo:GetDamagePosition()
 		ParticleEffect("blood_impact_red_01_goop", dmg_pos, self:GetAngles(), self)
-		self:SetHealth(self:Health() - dmginfo:GetDamage())
-		if self:Health() <= 0 and self.fucked == true  then
+		self.gib_Health = self.gib_Health - dmginfo:GetDamage()
+		print(self.gib_Health)
+		if self.gib_Health <= 0 and self.fucked == false   then
 			self.fucked = true 
 			if not (self:GetModel() == "models/props_junk/watermelon01_chunk02a.mdl") then
 				local bloodspray = EffectData()

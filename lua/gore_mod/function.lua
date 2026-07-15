@@ -116,11 +116,13 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 		noob_gore_TransferBones( ragdoll, ragdollGIB )
 		ragdollGIB:SetNoDraw(true )
 		ragdollGIB:DrawShadow(false )
+		timer.Simple(0, function()
 		net.Start( "noob_gore_benemerge" )
 			net.WriteEntity(ragdoll) --the original ragdoll
 			net.WriteInt(bone_id, 8 ) --bone to get cut
 			net.WriteEntity(ragdollGIB)--the ragdoll limb
 		net.Broadcast()
+		end)
 		if dmg_data then
 			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
@@ -254,7 +256,7 @@ function ForcePhysBonePos2(ragdoll)
 		end
 	end
 end
-function gib_ragdolll(ragdoll,force)
+function gib_ragdolll(ragdoll,force,Particle)
 	if !ragdoll.gib_bone then
 		ragdoll.gib_bone = {}
 	end
@@ -270,40 +272,23 @@ function gib_ragdolll(ragdoll,force)
 		local dmg_data = {
             dmg_force = force/2
         }
-		if ragdoll.gib_bone[i] ~= i then
+
+		if ragdoll:GetManipulateBoneScale(boneid) ~= Vector(0.000000,0.000000,0.000000) then
 			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
 		end
 
 	end
-	local bloodeffect = EffectData()
-	bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
-	bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
-	bloodeffect:SetScale(50)
-	util.Effect("VJ_Blood1",bloodeffect)
-	ragdoll:Remove()
-end
-function gib_ragdolll2(ragdoll,force)
-	if !ragdoll.slice_gib then
-		ragdoll.slice_gib = {}
+	if Particle then
+		local bloodeffect = EffectData()
+		bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
+		bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
+		bloodeffect:SetScale(50)
+		util.Effect("VJ_Blood1",bloodeffect)
 	end
-	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
-		local boneid = ragdoll:TranslatePhysBoneToBone(i)
-		local bone_name = ragdoll:GetBoneName(boneid)
-		local phys = ragdoll:GetPhysicsObjectNum(i)
-		
-		if force == nil then
-			force = Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250))
-		end
 
-		local dmg_data = {
-            dmg_force = force/2
-        }
-		if ragdoll.slice_gib[boneid] == boneid then
-			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
-		end
-	end
 	ragdoll:Remove()
 end
+
 function bonemerge_prop(ragdoll,model)
 	local npc_model = ragdoll:GetModel()
 	local attachments = ragdoll:GetAttachments()
