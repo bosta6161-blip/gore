@@ -313,11 +313,31 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
     PrintTable(gib_PhysBone_RAGDOLLS)
 end )
 function dismember_limb(ragdoll,bone_name,dmg_data)
-
+	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
 	if dmg_data.slice == true then
 		decap_ragdoll(ragdoll,bone_name,dmg_data)
+	else
+		ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
 	end
 	gib_PhysBone(ragdoll,bone_name,dmg_data)
 	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 
+end
+
+function ApplyCorpseEffects(ragdoll)
+    if ragdoll.destructible_Corpse then
+        return 
+    end
+    local root_health_mult = GetConVar("root_bone_health_multiplier"):GetFloat()
+    local health_mult = GetConVar("limb_health_multiplier"):GetFloat()
+
+	ragdoll.destructible_Corpse = true
+    ragdoll.gore_mod_boneHealth = {}
+	ragdoll.gib_start_delay = CurTime() + 1
+    for i = 0, ragdoll:GetPhysicsObjectCount()-1 do
+        ragdoll.gore_mod_boneHealth[i] = ragdoll:GetPhysicsObjectNum(i):GetSurfaceArea()*0.25 * (( i == 0 && root_health_mult ) or health_mult)
+    end
+	ragdoll:CallOnRemove("Remove_ragdoll_from_the_table_shit", function()
+        table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
+    end)
 end
