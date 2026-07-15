@@ -1,4 +1,4 @@
-util.AddNetworkString( "noob_gore_sigma_matrix" )
+util.AddNetworkString( "noob_gore_gib_npc_bone" )
 util.AddNetworkString( "noob_gore_benemerge" )
 gore_mod_slice_damege = {
 	1,
@@ -80,6 +80,7 @@ function noob_gore_TransferBones( ragdoll1, ragdoll2 ) -- Transfers the bones of
 end
 
 function gore_mod_make_gibs(model,position,dmg_data,meat)
+	print("gib")
 	local gib = ents.Create( "gore_mod_gib_chunk" )
 	gib:SetModel(model)
 	gib:SetPos(position)
@@ -106,6 +107,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
     	ragdollGIB:Spawn()
+		print(ragdollGIB)
 		ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 		for i = 1, #ragdoll:GetBodyGroups() do
 			ragdollGIB:SetBodygroup(i, ragdoll:GetBodygroup(i))
@@ -130,6 +132,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end
 		ragdollGIB.gib_bone = {}
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
+		if ragdoll.gib_bone then
 		for phys, v in pairs(ragdoll.gib_bone) do
 			local boneid = ragdoll:TranslatePhysBoneToBone(phys)
 			local bone_name2 = ragdoll:GetBoneName(boneid)
@@ -143,7 +146,8 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 				hook.Call( "noob_gore_gap", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name2) --call this hook to make cap based on bone name
 			end
 		end
-
+		end
+		hook.Call( "noob_gore_gap_limb", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
@@ -321,7 +325,6 @@ function dismember_limb(ragdoll,bone_name,dmg_data)
 	end
 	gib_PhysBone(ragdoll,bone_name,dmg_data)
 	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
-
 end
 
 function ApplyCorpseEffects(ragdoll)

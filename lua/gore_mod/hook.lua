@@ -9,9 +9,17 @@ bone_name_togap = {
 	["ValveBiped.Bip01_L_Foot"] = "models/noob_dev2323/gib/l_foot.mdl",
 	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/head_gore2.mdl"
 } 
+bone_name_togaplimb = {
+	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/headcap.mdl"
+} 
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     if bone_name_togap[bone_name] then
         bonemerge_prop(ragdoll,bone_name_togap[bone_name])
+    end
+end )
+hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
+    if bone_name_togaplimb[bone_name] then
+        bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
     end
 end )
 bone_name_togib = {
