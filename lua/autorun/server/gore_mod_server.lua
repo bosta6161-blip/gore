@@ -22,6 +22,18 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
         if dmg_data.dmg_type == 64 and dmg_data.dmg_total_damege > 100 then
             gib_ragdolll(ragdoll,dmg_data.dmg_force)
         else
+            if owner.LeftArmDestroid or owner.RightArmDestroid then
+                dmg_data.slice = true 
+                if owner.RightArmDestroid then
+                    gib_PhysBone(ragdoll,"ValveBiped.Bip01_R_Forearm",dmg_data)
+                    hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
+                end
+                if owner.LeftArmDestroid then
+                    gib_PhysBone(ragdoll,"ValveBiped.Bip01_L_Forearm",dmg_data)
+                    hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
+                end
+            end
+            dmg_data.slice = false  
             local hit = GetClosestPhysBone(ragdoll,dmg_data.dmg_pos)
             local bone = ragdoll:TranslatePhysBoneToBone(hit)
             local bone_name = ragdoll:GetBoneName( bone ) 	

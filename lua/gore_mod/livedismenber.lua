@@ -1,6 +1,7 @@
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
 
     if not IsValid(npc) then return end
+    if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
     local dmg_data = {
         dmg_type = dmginfo:GetDamageType(),
         dmg_pos = dmginfo:GetDamagePosition(),
