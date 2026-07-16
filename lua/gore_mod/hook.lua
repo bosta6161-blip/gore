@@ -12,6 +12,7 @@ bone_name_togap = {
 	["ValveBiped.head"] = "models/noob_dev2323/gib/l4d/vortigount.mdl"
 } 
 bone_name_togaplimb = {
+    ["ValveBiped.Bip01_Spine2"] = "models/noob_dev2323/gib/l4d/half2.mdl",
 	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/headcap.mdl"
 } 
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
