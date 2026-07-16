@@ -39,7 +39,8 @@ function TOOL:LeftClick(trace)
 		local hit = GetClosestPhysBone(ent,hitposition)
 		local bone = ent:TranslatePhysBoneToBone(hit)
 		local bone_name = ent:GetBoneName( bone ) 	
-		dismember_limb(ent,bone_name,dmg_data)
+		dismember_limb(ent,bone_name,dmg_data) 
+
 		ent:EmitSound('garrysmod/save_load'..math.random(1,3)..'.wav', 75, 100, 0.4) --make funny sound
 	end
 end

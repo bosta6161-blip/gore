@@ -89,7 +89,7 @@ function gore_mod_make_gibs(model,position,dmg_data,meat)
 	gib:Spawn()	
     local phys = gib:GetPhysicsObject()
 
-    if IsValid(phys) then 
+    if IsValid(phys) and dmg_data then 
 		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 18))
 		phys:AddAngleVelocity(Vector(math.Rand(-200, 200), math.Rand(-200, 200), math.Rand(-200, 200)))
 	end   
@@ -147,7 +147,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 			end
 		end
 		end
-		hook.Call( "noob_gore_gap_limb", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
+		hook.Call( "noob_gore_gap_limb", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name) --call this hook to make cap based on bone name
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
@@ -303,7 +303,7 @@ function bonemerge_prop(ragdoll,model)
 	if Attachment == nil then
 		return
 	end
-	ragdoll.bonemerge_prop = ents.Create("prop_physics") 
+	ragdoll.bonemerge_prop = ents.Create("prop_dynamic") 
 	ragdoll.bonemerge_prop:SetModel(model)
 	ragdoll.bonemerge_prop:SetLocalPos(ragdoll:GetPos())
 	ragdoll.bonemerge_prop:SetParent(ragdoll)
@@ -312,7 +312,9 @@ function bonemerge_prop(ragdoll,model)
 	ragdoll.bonemerge_prop:Activate()
 	ragdoll.bonemerge_prop:SetSolid(SOLID_NONE)
 	ragdoll.bonemerge_prop:AddEffects(EF_BONEMERGE)
+	ragdoll:DeleteOnRemove(ragdoll.bonemerge_prop)
 end
+
 concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
     PrintTable(gib_PhysBone_RAGDOLLS)
 end )

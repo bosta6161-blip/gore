@@ -7,7 +7,9 @@ bone_name_togap = {
     ["ValveBiped.Bip01_L_Calf"] = "models/noob_dev2323/gib/l_leg_gap.mdl",
 	["ValveBiped.Bip01_R_Foot"] = "models/noob_dev2323/gib/r_foot.mdl",
 	["ValveBiped.Bip01_L_Foot"] = "models/noob_dev2323/gib/l_foot.mdl",
-	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/head_gore2.mdl"
+	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/head_gore2.mdl",
+	["ValveBiped.Bip01_Spine2"] = "models/noob_dev2323/gib/l4d/half1.mdl",
+	["ValveBiped.head"] = "models/noob_dev2323/gib/l4d/vortigount.mdl"
 } 
 bone_name_togaplimb = {
 	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/headcap.mdl"

@@ -1,31 +1,68 @@
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
-
-    if not IsValid(npc) then return end
     if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
+	if not npc.LeftArmHealth then
+		npc.RightArmHealth = npc:GetMaxHealth()/2.1
+		npc.LeftArmHealth = npc:GetMaxHealth()/2
+    end
+
     local dmg_data = {
         dmg_type = dmginfo:GetDamageType(),
         dmg_pos = dmginfo:GetDamagePosition(),
         dmg_force = dmginfo:GetDamageForce(),
+        dmg = dmginfo:GetDamage(),
         slice = false 
     }
     if hitgroup == HITGROUP_RIGHTARM and not npc.RightArmDestroid then
-        npc.RightArmDestroid = true
-        npc:DropWeapon()
-        npc:SetEnemy(NULL)
-        npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
-        bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_r.mdl")
-        destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
+        npc.RightArmHealth = npc.RightArmHealth - dmg_data.dmg
+        if npc.RightArmHealth < 0 then
+            npc.RightArmDestroid = true
+            npc:DropWeapon()
+            npc:SetEnemy(NULL)
+            npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+
+            bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_r.mdl")
+            destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
+        end
     end
     if hitgroup == HITGROUP_LEFTARM and not npc.LeftArmDestroid then
-        npc.LeftArmDestroid = true
-
-        npc:DropWeapon()
-        npc:SetEnemy(NULL)
-        npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
-        bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_l.mdl")
-        destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
+        npc.LeftArmHealth = npc.LeftArmHealth - dmg_data.dmg
+        if npc.LeftArmHealth < 0 then
+            npc.LeftArmDestroid = true
+            npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
+            npc:SetEnemy(NULL)
+            npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+            bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_l.mdl")
+            destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
+        end
     end
 end)
+
+
+hook.Add("Think","ArmCripple_AI",function()
+    for _,npc in ipairs(ents.GetAll()) do
+        if not npc:IsNPC() then continue end
+        if npc.LeftArmDestroid then
+            local sched = npc:GetCurrentSchedule()
+            local act   = npc:GetActivity()
+
+            if not npc.DroppedWeaponAlready then
+
+                if sched == SCHED_RELOAD or act == ACT_RELOAD then
+                    npc.DroppedWeaponAlready = true
+
+                    npc:DropWeapon()
+
+                    npc:SetEnemy(NULL)
+                    npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+                end
+
+            end
+
+        end
+
+    end
+end)
+
 function destroy_npc_limb(npc,bonename,dmg_data)
     if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
         decap_ragdoll(npc,bonename,dmg_data)
