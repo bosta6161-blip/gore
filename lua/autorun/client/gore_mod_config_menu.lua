@@ -96,15 +96,14 @@ function GoremodOpenConfirmMenu()
 
         content:Clear()
 		if title == "Settings" then
-			local formGeneral = vgui.Create("DForm", content)
-			formGeneral:Dock(TOP)
-			formGeneral:SetName("General Options")
+			local DermaCheckbox = content:Add( "DCheckBoxLabel" ) -- Create the checkbox
 
-			formGeneral:CheckBox( "gore enable", "gore_enable" )
-			
-			formGeneral:CheckBox( "live dismenber EXPEREMENTAL", "live_dismenber_EXPEREMENTAL" )
-			formGeneral:NumSlider( "limb_health_multiplier", "limb_health_multiplier", -10, 10 )
-			formGeneral:NumSlider( "root_bone_health_multiplier", "root_bone_health_multiplier", -10, 10 )
+			DermaCheckbox:SetText("gore enable")					-- Set the text next to the box
+			DermaCheckbox:SetValue( true )						-- Initial value
+			DermaCheckbox:SetFont("smash")
+			DermaCheckbox:SetTextColor(color_white)
+			DermaCheckbox:SizeToContents()						-- Make its size the same as the contents
+			DermaCheckbox:SetConVar("gore_enable")				-- Change a ConVar when the box it ticked/unticked
 		else
         local label = vgui.Create("DLabel", content)
         label:SetFont("Trebuchet24")
