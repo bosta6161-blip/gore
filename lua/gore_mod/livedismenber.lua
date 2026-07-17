@@ -1,4 +1,6 @@
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
+    if GetConVar("gore_enable"):GetBool() == false then return end
+    if GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() == false then return end
     if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
 	if not npc.LeftArmHealth then
 		npc.RightArmHealth = npc:GetMaxHealth()/2.1

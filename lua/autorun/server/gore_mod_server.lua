@@ -20,7 +20,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
         }
         ApplyCorpseEffects(ragdoll)
         if dmg_data.dmg_type == 64 and dmg_data.dmg_total_damege > 100 then
-            gib_ragdolll(ragdoll,dmg_data.dmg_force)
+            gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
         else
             if owner.LeftArmDestroid or owner.RightArmDestroid then
                 dmg_data.slice = true 
