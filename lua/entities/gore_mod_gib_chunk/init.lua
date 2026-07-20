@@ -51,9 +51,9 @@ function ENT:PhysicsCollide(data, physobj)
 	end
 	if data.Speed > 30 and data.DeltaTime > 0.1 then
 		if self.bloodColor_is_YELLOW then
-			ParticleEffect("blood_impact_red_01_goop", self:GetPos(), self:GetAngles(), self)
-		else
 			ParticleEffect("blood_impact_antlion_worker_01", self:GetPos(), self:GetAngles(), self)
+		else
+			ParticleEffect("blood_impact_red_01_goop", self:GetPos(), self:GetAngles(), self)
     	end
 	end
 end
