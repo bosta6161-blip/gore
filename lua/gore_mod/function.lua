@@ -40,7 +40,7 @@ function colideBone(ragdoll,phys_bone)
 	colide:SetMaterial("gmod_silent")
 	colide:Sleep()
 	colide:EnableMotion(false)
-	colide:IsMoveable(false)
+	colide:EnableMotion(false)
 	colide:SetBuoyancyRatio(0)
 	colide:AddGameFlag(1024) 
 	colide:EnableGravity(false)
@@ -94,6 +94,9 @@ function gore_mod_make_gibs(model,position,dmg_data,meat)
 		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 30))
 		phys:AddAngleVelocity(Vector(math.Rand(-200, 200), math.Rand(-200, 200), math.Rand(-200, 200)))
 	end   
+	if dmg_data.bloodColor_is_YELLOW then
+		gib.bloodColor_is_YELLOW = true 
+    end
 	if meat == true then gib:SetMaterial( "models/flesh" ) end
 end 
 
@@ -332,6 +335,10 @@ function ApplyCorpseEffects(ragdoll)
     for i = 0, ragdoll:GetPhysicsObjectCount()-1 do
         ragdoll.gore_mod_boneHealth[i] = ragdoll:GetPhysicsObjectNum(i):GetSurfaceArea()*0.25 * (( i == 0 && root_health_mult ) or health_mult)
     end
+	local surfaceProp = ragdoll:GetBoneSurfaceProp(0)
+	if surfaceProp == "alienflesh" or surfaceProp == "antlion" or surfaceProp == "zombieflesh" then
+		ragdoll.goremod_bloodColor_is_YELLOW = true 
+	end	
 	ragdoll:CallOnRemove("Remove_ragdoll_from_the_table_shit", function()
         table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
     end)

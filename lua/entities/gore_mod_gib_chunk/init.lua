@@ -42,11 +42,19 @@ function ENT:PhysicsCollide(data, physobj)
 	if math.random(1, 8) == 1 then
 		sound.Play("physics/flesh/flesh_squishy_impact_hard" .. math.random(1,4) .. ".wav", self:GetPos(), 75, 100, 1)
 		if	not (self:GetModel() == "models/props_junk/watermelon01_chunk02a.mdl") or (self:GetModel() == "models/mosi/fnv/props/gore/gorehead01.mdl") then
-			util.Decal( "Blood", self:GetPos(), self:GetPos() - Vector(math.random(-16,16), math.random(-16,16), 9999))
+			local blood = "Blood"
+			if self.bloodColor_is_YELLOW then
+				blood = "YellowBlood"
+    		end
+			util.Decal(blood, self:GetPos(), self:GetPos() - Vector(math.random(-16,16), math.random(-16,16), 9999))
 		end
 	end
 	if data.Speed > 30 and data.DeltaTime > 0.1 then
-		ParticleEffect("blood_impact_red_01_goop", self:GetPos(), self:GetAngles(), self)
+		if self.bloodColor_is_YELLOW then
+			ParticleEffect("blood_impact_red_01_goop", self:GetPos(), self:GetAngles(), self)
+		else
+			ParticleEffect("blood_impact_antlion_worker_01", self:GetPos(), self:GetAngles(), self)
+    	end
 	end
 end
 function ENT:OnTakeDamage( dmginfo )

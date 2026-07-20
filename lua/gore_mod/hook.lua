@@ -14,6 +14,10 @@ hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_
         if !goremod_CustomGibs[bone_name] then return {}, 1 end
         return goremod_CustomGibs[bone_name].gibs or 1
     end
+    if ragdoll.goremod_bloodColor_is_YELLOW then
+        dmg_data.bloodColor_is_YELLOW = true
+    end
+
     local custom_gibs = get_custom_gibs(bone_name)
     for _,v in ipairs(custom_gibs) do
         for i = 1, ( v.count && ( istable(v.count) && math.random(v.count[1], v.count[2]) ) or v.count ) or 1 do
