@@ -1,5 +1,6 @@
 include( "gore_mod/ConVar.lua" )
 
+
 hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib script
     if npc:IsNPC() then
         npc.dmg_pos = dmginfo:GetDamagePosition()
@@ -43,6 +44,8 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     dmg_data.slice = true 
+                else
+                    ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)                
                 end
                 dismember_limb(ragdoll,bone_name,dmg_data) 
             end

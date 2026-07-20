@@ -1,5 +1,7 @@
+local ENT = FindMetaTable("Entity")
 util.AddNetworkString( "noob_gore_gib_npc_bone" )
 util.AddNetworkString( "noob_gore_benemerge" )
+
 gore_mod_slice_damege = {
 	1,
 	4,
@@ -80,21 +82,18 @@ function noob_gore_TransferBones( ragdoll1, ragdoll2 ) -- Transfers the bones of
 end
 
 function gore_mod_make_gibs(model,position,dmg_data,meat)
-	print("gib")
 	local gib = ents.Create( "gore_mod_gib_chunk" )
 	gib:SetModel(model)
 	gib:SetPos(position)
 	gib:SetAngles(Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))) 
-
 	gib:Spawn()	
     local phys = gib:GetPhysicsObject()
 
     if IsValid(phys) and dmg_data then 
-		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 18))
+		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 30))
 		phys:AddAngleVelocity(Vector(math.Rand(-200, 200), math.Rand(-200, 200), math.Rand(-200, 200)))
 	end   
 	if meat == true then gib:SetMaterial( "models/flesh" ) end
-	
 end 
 
 function decap_ragdoll(ragdoll,bone_name,dmg_data)
@@ -156,16 +155,6 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 	end
 end 
 
-/*
-function decap_ragdoll(ragdoll,bone_name)
-    if ragdoll:LookupBone(bone_name) == nil or ragdoll:LookupBone(bone_name) == 0 then return end
-    local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-	net.Start( "noob_gore_sigma_matrix" )
-		net.WriteEntity(ragdoll)
-		net.WriteInt(bone_id, 8 )
-	net.Broadcast()
-end 
-*/
 
 
 

@@ -48,7 +48,6 @@ hook.Add("Think","ArmCripple_AI",function()
             local act   = npc:GetActivity()
 
             if not npc.DroppedWeaponAlready then
-
                 if sched == SCHED_RELOAD or act == ACT_RELOAD then
                     npc.DroppedWeaponAlready = true
 
@@ -57,11 +56,8 @@ hook.Add("Think","ArmCripple_AI",function()
                     npc:SetEnemy(NULL)
                     npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
                 end
-
             end
-
         end
-
     end
 end)
 
@@ -69,6 +65,7 @@ function destroy_npc_limb(npc,bonename,dmg_data)
     if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
         decap_ragdoll(npc,bonename,dmg_data)
     else
+        --ParticleEffect("blood_advisor_puncture", npc:GetBonePosition(npc:LookupBone(bonename)), npc:GetAngles(), self)       
         make_npc_gibs(npc,bonename,dmg_data)
     end
 

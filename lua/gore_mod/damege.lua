@@ -32,7 +32,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     dmg_data.slice = true 
                 else
-                    ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)
+                    ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)
                 end
 
                 if bone == 0 then

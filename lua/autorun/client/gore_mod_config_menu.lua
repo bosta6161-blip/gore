@@ -102,6 +102,7 @@ function GoremodOpenConfirmMenu()
 			DermaCheckbox:SetValue( true )						-- Initial value
 			DermaCheckbox:SetFont("smash")
 			DermaCheckbox:SetTextColor(color_white)
+            DermaCheckbox:DockMargin(20, 20, 0, 20)
 			DermaCheckbox:SizeToContents()						-- Make its size the same as the contents
 			DermaCheckbox:SetConVar("gore_enable")				-- Change a ConVar when the box it ticked/unticked
 		else

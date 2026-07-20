@@ -109,33 +109,3 @@ hook.Add("PreCleanupMap", "Ragdoll_GibsCleanup", function()
     end
 end)
 
-hook.Add("HUDPaint", "DrawBonePositions", function()
-	if GetConVar("gore_debug"):GetBool() then
-    for _, ragdoll in ipairs(ents.GetAll()) do
-		if ragdoll.is_a_ragdoll_gib then  
-
-    	for i = 0, ragdoll:GetBoneCount() - 1 do
-        	if ragdoll.slice_gib[i] == i then
-            	local pos = ragdoll:GetBonePosition(i)
-
-            	if i ~= -1 then
-                	local screen = pos:ToScreen()
-
-                	draw.SimpleTextOutlined(
-            	        ragdoll:GetBoneName(i),
-            	        "DermaDefault",
-            	        screen.x,
-            	        screen.y,
-            	        Color(255, 255, 255),
-        	            TEXT_ALIGN_CENTER,
-        	            TEXT_ALIGN_CENTER,
-        	            1,
-        	            Color(0, 0, 0)
-        	        )
-        	    end
-        	end
-		end
-	end
-    end
-	end
-end)
