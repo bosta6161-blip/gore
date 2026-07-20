@@ -83,6 +83,6 @@ function make_npc_gibs(npc,bone_name,dmg_data)
     local children = npc:GetChildBones(bone_id)
     for k, v in pairs(children) do --no more shit code
 		local bone_children_name = npc:GetBoneName( v )
-        make_npc_gibs(npc,bone_children_name)
+        make_npc_gibs(npc,bone_children_name,dmg_data)
     end
 end
