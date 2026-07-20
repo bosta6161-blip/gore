@@ -177,3 +177,11 @@ bone_name_togaplimb = {
     ["ValveBiped.Bip01_Spine2"] = "models/noob_dev2323/gib/l4d/half2.mdl",
 	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/headcap.mdl"
 } 
+BasicGib_Models = { 
+    "models/mosi/fnv/props/gore/insectbit01.mdl", 
+    "models/mosi/fnv/props/gore/insectbit02.mdl",
+    "models/mosi/fnv/props/gore/insectbit03.mdl",
+    "models/mosi/fnv/props/gore/insectbit04.mdl", 
+    "models/mosi/fnv/props/gore/insectbit06.mdl", 
+    "models/mosi/fnv/props/gore/insectbit07.mdl"
+}

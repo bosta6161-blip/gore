@@ -91,7 +91,7 @@ function gore_mod_make_gibs(model,position,dmg_data,meat)
     local phys = gib:GetPhysicsObject()
 
     if IsValid(phys) and dmg_data then 
-		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 30))
+		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 20))
 		phys:AddAngleVelocity(Vector(math.Rand(-200, 200), math.Rand(-200, 200), math.Rand(-200, 200)))
 	end   
 	if dmg_data.bloodColor_is_YELLOW then
@@ -280,7 +280,7 @@ function gib_ragdolll(ragdoll,force,Particle)
 		bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
 		bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
 		bloodeffect:SetScale(50)
-		util.Effect("VJ_Blood1",bloodeffect)
+		util.Effect("goremod_blood_smoke",bloodeffect)
 	end
 
 	ragdoll:Remove()
