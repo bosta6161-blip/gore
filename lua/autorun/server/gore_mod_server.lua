@@ -92,28 +92,6 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             local bone_name = ragdoll:GetBoneName( bone ) 	
             print(bone_name)
 
- 
-        local meme = ents.Create("prop_dynamic")
-        local ang = hit.HitNormal:Angle()
-
-        local lpos, lang = WorldToLocal(hit.HitPos,ang, ragdoll:GetBonePosition(bone))
-        if not IsValid(meme) then return end
-        
-        meme:SetModel("models/zurf3rmodelporting/smallest.mdl")               
-        meme:Spawn()
-        meme:SetNotSolid(true)
-        meme:DrawShadow(false)
- 
-        SafeRemoveEntityDelayed(meme, 15)
- 
-        meme:FollowBone(ragdoll, bone)
-        lang = lang - Angle(0,90,0)
-        meme:SetLocalAngles(lang)
-        meme:SetLocalPos(lpos - lang:Forward()*-0)
-
-
-
-
             if ragdoll.gore_mod_boneHealth[PhysicsBone] then
 				ragdoll.gore_mod_boneHealth[PhysicsBone] = ragdoll.gore_mod_boneHealth[PhysicsBone] - dmg_data.dmg_total_damege*2
 			end	
