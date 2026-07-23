@@ -29,7 +29,7 @@ net.Receive( "noob_gore_benemerge", function()
 			colideBone2(ragdoll,i)
 		end
 	end
-	PrintTable(ragdoll.slice_gib)
+
 	ragdoll:SnatchModelInstance(ent)
     ragdoll:AddCallback("BuildBonePositions",GibCallback)
 end )

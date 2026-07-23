@@ -185,3 +185,21 @@ BasicGib_Models = {
     "models/mosi/fnv/props/gore/insectbit06.mdl", 
     "models/mosi/fnv/props/gore/insectbit07.mdl"
 }
+goremod_model_gap_blacklist = {
+    ["models/stalker.mdl"] = true,  
+    ["models/player/vengeance/skeleton_with_hands/skeleton_with_hands.mdl"] = true,  
+    ["models/akuld/hl1dmskel/dm_skel.mdl"] = true,  
+    ["models/combine_strider.mdl"] = true,  
+    ["models/humans/infoplayerstart.mdl"] = true,  
+    ["models/player/infoplayerstart.mdl"] = true,  
+    ["models/player/skeleton.mdl"] = true,  
+    ["models/player/zombie_fast.mdl"] = true,  
+    ["models/ratdock/squidwod_tennicles.mdl"] = true,  
+    ["models/zombie/fast.mdl"] = true,  
+    ["models/player/quinton_olson.mdl"] = true,  
+    ["models/player/charple.mdl"] = true,  
+    ["models/skeleton/skeleton_bleached.mdl"] = true,  
+    ["models/skeleton/skeleton_bloody.mdl"] = true,  
+    ["models/skeleton/skeleton_decomp.mdl"] = true,  
+    ["models/vj_nullbody_npc.mdl"] = true,  
+}

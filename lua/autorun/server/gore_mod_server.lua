@@ -7,6 +7,11 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
         npc.dmg_type = dmginfo:GetDamageType()
         npc.dmg_force = dmginfo:GetDamageForce()
         npc.dmg_total_damege = dmginfo:GetDamage()
+        if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
+            if dmginfo:IsDamageType(DMG_DISSOLVE) then
+                npc.isdissolverd = true 
+            end
+        end
     end
 end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
@@ -19,6 +24,62 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             dmg_total_damege = owner.dmg_total_damege,
             slice = false 
         }
+        if owner.isdissolverd then
+            if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
+	            for _,ragdoll in ipairs( ragdoll:GetChildren() ) do
+		            if ragdoll:GetClass() == "env_entity_dissolver" then
+                        ragdoll:Remove()
+		            end
+	            end
+                ragdoll:SetRenderMode( RENDERMODE_TRANSCOLOR )
+                ragdoll:SetRenderFX( kRenderFxFadeSlow )
+                dmg_data.dmg_total_damege = 0
+		        for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+			        local colide = ragdoll:GetPhysicsObjectNum( i )
+			        colide:EnableGravity(true )
+		        end
+                timer.Simple(2, function()
+			        if IsValid(ragdoll) then
+                        local startPos = ragdoll:GetBonePosition(0)
+                        local downTrace = util.TraceLine({
+                            start = startPos,
+                            endpos = startPos - Vector(0, 0, 200),
+                            filter = ragdoll
+                        })
+
+                        if downTrace.Hit then
+                            local gib = ents.Create("prop_dynamic")
+                            gib:SetModel("models/mosi/fnv/props/effects/ashpile.mdl")
+		                    gib:SetPos(downTrace.HitPos - Vector(0,0,0.7)) 
+                            local ang = downTrace.HitNormal:Angle()
+                            ang:RotateAroundAxis(ang:Right(), -90)
+		                    gib:SetAngles(ang)
+                            gib:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+                            gib:Spawn()
+                            timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
+			                    if IsValid(gib) then
+				                    gib:Remove()
+			                    end
+		                    end)
+                        end
+			        end
+		        end)
+            end
+        end
+        if owner:IsOnFire() and GetConVar("burned_corpse_effect_EXPEREMENTAL"):GetBool() and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then --fire efect
+            local ragdollGIB = ents.Create("prop_ragdoll")
+            if IsValid(ragdollGIB) and IsValid(ragdoll) then
+    	        ragdollGIB:SetModel("models/player/charple.mdl")
+    	        ragdollGIB:SetPos(ragdoll:GetPos()) 
+                ragdollGIB:SetSkin( ragdoll:GetSkin() )
+    	        ragdollGIB:Spawn()
+
+		        ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+                noob_gore_TransferBones( ragdoll, ragdollGIB )
+                ragdollGIB:Ignite(15,20)
+            end
+            ragdoll:Remove()
+		end
         ApplyCorpseEffects(ragdoll)
 
         if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 then

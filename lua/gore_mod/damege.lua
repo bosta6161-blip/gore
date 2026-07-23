@@ -1,5 +1,5 @@
 hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
-	if GetConVar("gore_enable"):GetBool() == true then
+	if GetConVar("gore_enable"):GetBool() == true and  GetConVar("can_gib_ragdoll"):GetBool() == true then
 		if ragdoll:IsRagdoll() and ragdoll.destructible_Corpse and CurTime() > ragdoll.gib_start_delay then 
 			local doDamege = true 
 			if dmgType == DMG_CRUSH and dmginfo:GetDamage() < 500 then

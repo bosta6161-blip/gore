@@ -3,8 +3,8 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
     if GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() == false then return end
     if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
 	if not npc.LeftArmHealth then
-		npc.RightArmHealth = npc:GetMaxHealth()/2.1
-		npc.LeftArmHealth = npc:GetMaxHealth()/2
+		npc.RightArmHealth = npc:GetMaxHealth()/1.6
+		npc.LeftArmHealth = npc:GetMaxHealth()/1.6
     end
 
     local dmg_data = {
@@ -12,6 +12,7 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
         dmg_pos = dmginfo:GetDamagePosition(),
         dmg_force = dmginfo:GetDamageForce(),
         dmg = dmginfo:GetDamage(),
+        no_tiny_gibs = true,
         slice = false 
     }
     if hitgroup == HITGROUP_RIGHTARM and not npc.RightArmDestroid then

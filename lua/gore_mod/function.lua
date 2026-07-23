@@ -74,10 +74,14 @@ function noob_gore_TransferBones( ragdoll1, ragdoll2 ) -- Transfers the bones of
 	if !IsValid( ragdoll1 ) or !IsValid( ragdoll2 ) then return end
 	for i = 0, ragdoll2:GetPhysicsObjectCount() - 1 do
 		local bone = ragdoll2:GetPhysicsObjectNum( i )
+		local bone2 = ragdoll1:GetPhysicsObjectNum( i )
 		if ( IsValid( bone ) ) then
 			local pos, ang = ragdoll1:GetBonePosition( ragdoll2:TranslatePhysBoneToBone( i ) )
 			if ( pos ) then bone:SetPos( pos,true ) end
 			if ( ang ) then bone:SetAngles( ang ) end
+			if bone2 ~= nil then
+				bone:AddVelocity(bone2:GetVelocity())	
+			end
 		end
 	end
 end
@@ -91,7 +95,7 @@ function gore_mod_make_gibs(model,position,dmg_data,meat)
     local phys = gib:GetPhysicsObject()
 
     if IsValid(phys) and dmg_data then 
-		phys:AddVelocity(Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250)) + (dmg_data.dmg_force / 20))
+		phys:AddVelocity(Vector(math.Rand(-10, 10), math.Rand(-10, 10), math.Rand(10, 150)) + (dmg_data.dmg_force / 20))
 		phys:AddAngleVelocity(Vector(math.Rand(-200, 200), math.Rand(-200, 200), math.Rand(-200, 200)))
 	end   
 	if dmg_data.bloodColor_is_YELLOW then
@@ -128,11 +132,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 			net.WriteEntity(ragdollGIB)--the ragdoll limb
 		net.Broadcast()
 		end)
-		if dmg_data then
-			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
-			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
-			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
-		end
+
 		ragdollGIB.gib_bone = {}
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
 		if ragdoll.gib_bone then
@@ -151,6 +151,7 @@ function decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end
 		end
 		hook.Call( "noob_gore_gap_limb", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name) --call this hook to make cap based on bone name
+		ApplyCorpseEffects(ragdollGIB) 
 		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
 			if IsValid(ragdollGIB) then
 				ragdollGIB:Remove()
@@ -278,7 +279,7 @@ function gib_ragdolll(ragdoll,force,Particle)
 	if Particle then
 		local bloodeffect = EffectData()
 		bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
-		bloodeffect:SetColor(VJ_Color2Byte(Color(130,19,10)))
+		bloodeffect:SetColor(100)
 		bloodeffect:SetScale(50)
 		util.Effect("goremod_blood_smoke",bloodeffect)
 	end
@@ -319,6 +320,9 @@ function dismember_limb(ragdoll,bone_name,dmg_data)
 		ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
 	end
 	gib_PhysBone(ragdoll,bone_name,dmg_data)
+
+
+
 	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 end
 

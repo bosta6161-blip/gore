@@ -64,7 +64,16 @@ function TOOL:RightClick(trace)
 		ent:EmitSound('garrysmod/save_load'..math.random(1,3)..'.wav', 75, 100, 0.4) --make funny sound
 	end
 end
-
+function TOOL:Reload(trace)
+	local ent = trace.Entity
+	if ent:IsNPC() or ent:IsNextBot() then 
+		ent:EmitSound('phx/hmetal'..math.random(1,3)..'.wav', 75, 100, 0.4) --make metal sound
+		return
+	end
+	if IsValid(ent) and ent:IsRagdoll() then
+		gib_ragdolll(ent,Vector(0,0,0),true)
+	end
+end
 end
 
 -- This controls the part of the UI which shows options for this tool

@@ -1,10 +1,10 @@
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
-    if bone_name_togap[bone_name] then
+    if not goremod_model_gap_blacklist[model] and bone_name_togap[bone_name] then
         bonemerge_prop(ragdoll,bone_name_togap[bone_name])
     end
 end )
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
-    if bone_name_togaplimb[bone_name] then
+    if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
         bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
     end
 end )
@@ -25,11 +25,11 @@ hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_
                 gore_mod_make_gibs(v.model,ragdoll:GetBonePosition(bone_id),dmg_data)  
             end
         end
-    else
+    elseif not dmg_data.no_tiny_gibs then
         if dmg_data.bloodColor_is_YELLOW then
             gore_mod_make_gibs(table.Random(BasicGib_Models),ragdoll:GetBonePosition(bone_id),dmg_data) 
         else
-            for i = 1, 6 do
+            for i = 1,math.random(1,3) do
                 gore_mod_make_gibs("models/props_junk/watermelon01_chunk02a.mdl",ragdoll:GetBonePosition(bone_id),dmg_data,true) 
             end
         end
