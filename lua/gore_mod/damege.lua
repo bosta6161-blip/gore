@@ -1,34 +1,53 @@
 hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
 	if GetConVar("gore_enable"):GetBool() == true and  GetConVar("can_gib_ragdoll"):GetBool() == true then
 		if ragdoll:IsRagdoll() and ragdoll.destructible_Corpse and CurTime() > ragdoll.gib_start_delay then 
-			local doDamege = true 
-			if dmgType == DMG_CRUSH and dmginfo:GetDamage() < 500 then
-				doDamege = false    
-			end 
-			local dmg_force = dmginfo:GetDamage()
-			local hit = GetClosestPhysBone(ragdoll,dmginfo:GetDamagePosition()) --get hit physbone
-			if hit == nil then
-				return 
-			end
-			local bone = ragdoll:TranslatePhysBoneToBone(hit)
-			local bone_name = ragdoll:GetBoneName( bone ) 		
-            
             local dmg_data = {
                 dmg_type = dmginfo:GetDamageType(),
                 dmg_pos = dmginfo:GetDamagePosition(),
                 dmg_force = dmginfo:GetDamageForce(),
+                dmg_dir = dmginfo:GetDamageForce():Angle(),
                 slice = false 
             }
+			local doDamege = true 
+			if dmgType == DMG_CRUSH and dmginfo:GetDamage() < 500 then
+				doDamege = false    
+			end 
+            
+			local dmg_force = dmginfo:GetDamage()
+			local hit = GetClosestPhysBone(ragdoll,dmg_data) --get hit physbone
+            if hit == nil then
+				return 
+			end
+            local PhysicsBone = hit.PhysicsBone
+			local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
+			local bone_name = ragdoll:GetBoneName( bone ) 	
+            local meme = ents.Create("prop_dynamic")
+            local ang = hit.HitNormal:Angle()
+
+            local lpos, lang = WorldToLocal(hit.HitPos,ang, ragdoll:GetBonePosition(bone))
+            if not IsValid(meme) then return end
+        
+            meme:SetModel("models/mosi/fnv/props/gore/meatbit01.mdl")               
+            meme:Spawn()
+            meme:SetNotSolid(true)
+            meme:DrawShadow(false)
+ 
+            SafeRemoveEntityDelayed(meme, 15)
+ 
+            meme:FollowBone(ragdoll, bone)
+
+            meme:SetLocalAngles(lang)
+            meme:SetLocalPos(lpos)
+	
+            
+
             local damageForce = dmg_data.dmg_force:Length()
-            if ragdoll.gore_mod_boneHealth[hit] then
-				ragdoll.gore_mod_boneHealth[hit] = ragdoll.gore_mod_boneHealth[hit] - dmginfo:GetDamage()
-				print("health"..ragdoll.gore_mod_boneHealth[hit])
+            if ragdoll.gore_mod_boneHealth[PhysicsBone] then
+				ragdoll.gore_mod_boneHealth[PhysicsBone] = ragdoll.gore_mod_boneHealth[PhysicsBone] - dmginfo:GetDamage()
+				print("health"..ragdoll.gore_mod_boneHealth[PhysicsBone])
 			end
 
-			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and doDamege == true then 
-                local hit = GetClosestPhysBone(ragdoll,dmg_data.dmg_pos)
-                local bone = ragdoll:TranslatePhysBoneToBone(hit)
-                local bone_name = ragdoll:GetBoneName( bone ) 	
+			if ragdoll.gore_mod_boneHealth[PhysicsBone] <= 0 and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone and doDamege == true then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     dmg_data.slice = true 
                 else

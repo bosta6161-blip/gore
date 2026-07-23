@@ -7,30 +7,13 @@ gore_mod_slice_damege = {
 	4,
 	1024
 }
-function GetClosestPhysBone(ragdoll,pos)
-	local closest_distance = -1
-	local closest_bone = -1
-
-	if !ragdoll.gib_bone then
-		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
-	end
-	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
-		local bone = ragdoll:TranslatePhysBoneToBone(i)
-		
-		if bone and ragdoll.gib_bone[i] ~= i then 
-			local phys = ragdoll:GetPhysicsObjectNum(i)
-			
-			if IsValid(phys) and pos then
-				local distance = phys:GetPos():Distance(pos)
-				
-				if (distance < closest_distance || closest_distance == -1) then
-					closest_distance = distance
-					closest_bone = i
-				end
-			end
-		end
-	end
-	return closest_bone
+function GetClosestPhysBone(ragdoll,dmg_data)
+    local tr = util.TraceLine({
+        start = dmg_data.dmg_pos,
+        endpos = dmg_data.dmg_pos + dmg_data.dmg_force:GetNormalized() * 256,
+        mask = MASK_SHOT
+    })
+	return tr
 end
 function colideBone(ragdoll,phys_bone)
 	local colide = ragdoll:GetPhysicsObjectNum( phys_bone ) --get bone id
@@ -252,6 +235,32 @@ function ForcePhysBonePos2(ragdoll)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone)
 			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0, 200 ),true)
 		end
+	end
+end
+function goremod_make_dust(ragdoll)
+	local startPos = ragdoll:GetBonePosition(0)
+    local downTrace = util.TraceLine({
+        start = startPos,
+        endpos = startPos - Vector(0, 0, 200),
+        filter = ragdoll
+    })
+
+    if downTrace.Hit then
+        local gib = ents.Create("prop_dynamic")
+        gib:SetModel("models/mosi/fnv/props/effects/ashpile.mdl")
+		gib:SetPos(downTrace.HitPos - Vector(0,0,0.7)) 
+        local ang = downTrace.HitNormal:Angle()
+        ang:RotateAroundAxis(ang:Right(), -90)
+		gib:SetAngles(ang)
+        gib:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+        gib:Spawn()
+		
+
+        timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
+			if IsValid(gib) then
+				gib:Remove()
+			end
+		end)
 	end
 end
 function gib_ragdolll(ragdoll,force,Particle)
