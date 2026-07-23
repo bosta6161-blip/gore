@@ -1,6 +1,9 @@
 hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
 	if GetConVar("gore_enable"):GetBool() == true and  GetConVar("can_gib_ragdoll"):GetBool() == true then
 		if ragdoll:IsRagdoll() and ragdoll.destructible_Corpse and CurTime() > ragdoll.gib_start_delay then 
+            if !ragdoll.gib_bone then
+		        ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+	        end
             local dmg_data = {
                 dmg_type = dmginfo:GetDamageType(),
                 dmg_pos = dmginfo:GetDamagePosition(),
@@ -15,7 +18,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
             
 			local dmg_force = dmginfo:GetDamage()
 			local hit = GetClosestPhysBone(ragdoll,dmg_data) --get hit physbone
-            if hit == nil then
+            if hit.PhysicsBone == nil then
 				return 
 			end
             local PhysicsBone = hit.PhysicsBone

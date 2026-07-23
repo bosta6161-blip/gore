@@ -8,6 +8,9 @@ gore_mod_slice_damege = {
 	1024
 }
 function GetClosestPhysBone(ragdoll,dmg_data)
+	if !ragdoll.gib_bone then
+		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+	end
     local tr = util.TraceLine({
         start = dmg_data.dmg_pos,
         endpos = dmg_data.dmg_pos + dmg_data.dmg_force:GetNormalized() * 256,

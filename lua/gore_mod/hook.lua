@@ -1,6 +1,45 @@
+goremod_Customgapgapgapsahur = {
+    ["ValveBiped.Bip01_Head1"] = {
+        model = "models/mosi/fnv/props/character/headcap.mdl",
+        localAng = Angle(90,-90,-132),
+        offset = Vector(-0.02,-3.28,0),
+        capScale = Vector(1, 1, 1)
+    },
+    ["ValveBiped.Bip01_Spine2"] = {
+        model = "models/torsopartial/abdomenvar.mdl",
+        localAng = Angle(0, 90, 90),
+        offset = Vector(-4,2,0),
+        capScale = Vector(1.1, 1.1, 1.1) 
+    },
+}
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
-    if not goremod_model_gap_blacklist[model] and bone_name_togap[bone_name] then
-        bonemerge_prop(ragdoll,bone_name_togap[bone_name])
+    local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+    local bone_parent = ragdoll:GetBoneParent(bone_id)
+    local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
+
+    local capScale = Vector(1, 1, 1)
+    local localAng = Angle(0, 0, 0)
+    local offset = Vector(0,0,0)
+
+    if goremod_Customgapgapgapsahur[bone_name] then
+        local gib_data = goremod_Customgapgapgapsahur[bone_name]
+        print(gib_data.model)
+        local gap = ents.Create("prop_dynamic")
+        local lpos, lang = WorldToLocal(bonepos,bone_rotation, ragdoll:GetBonePosition(bone_parent))
+
+        if not IsValid(gap) then return end
+        gap:SetModel(gib_data.model)               
+        gap:Spawn()
+        gap:SetNotSolid(true)
+        gap:DrawShadow(false)
+ 
+        SafeRemoveEntityDelayed(meme, 15)
+
+        gap:ManipulateBoneScale(0, capScale) --gap scale
+        gap:FollowBone(ragdoll, bone_parent)
+
+        gap:SetLocalAngles(gib_data.localAng)
+        gap:SetLocalPos(lpos + gib_data.offset)
     end
 end )
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
