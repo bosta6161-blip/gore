@@ -2,7 +2,7 @@ net.Receive( "noob_gore_benemerge", function()
     local ent = net.ReadEntity()
     local main_bone = net.ReadInt( 8 ) -- use the same number of bits that were written.
 	local ragdoll_parent = net.ReadEntity()
-	if not ent:IsValid() then
+	if not ragdoll_parent:IsValid() then
 		return 
 	end
 
