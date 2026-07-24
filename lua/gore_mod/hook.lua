@@ -3,7 +3,8 @@ goremod_Customgapgapgapsahur = {
         model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
         localAng = Angle(180,110,90),
         offset = Vector(-0.812,-2.608,0),
-        capScale = Vector(1, 1, 1)
+        capScale = Vector(1, 1, 1),
+        fem_offset = Vector(-2.912,-2.608,0) 
     },
     ["ValveBiped.Bip01_Spine2"] = {
         model = "models/torsopartial/abdomenvar.mdl",
@@ -11,27 +12,42 @@ goremod_Customgapgapgapsahur = {
         offset = Vector(-4,2,0),
         capScale = Vector(1.1, 1.1, 1.1) 
     },
+    ["ValveBiped.Bip01_R_UpperArm"] = {
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_r_arm_shoulder.mdl",
+        localAng = Angle(93.847,110,0),
+        offset = Vector(5.195, -4.284, -2.097),
+        capScale = Vector(1.1, 1.1,1.1),
+    },
+    ["ValveBiped.Bip01_L_UpperArm"] = {
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_l_arm_shoulder.mdl",
+        localAng = Angle(-75.366,-69.060,0),
+        offset = Vector(5.579,-4.392,2.039),
+        capScale = Vector(1.1, 1.1,1.1),
+    }
 }
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
     local bone_parent = ragdoll:GetBoneParent(bone_id)
     local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
 
+    local model = ragdoll:GetModel()
     local capScale = Vector(1, 1, 1)
     local localAng = Angle(0, 0, 0)
     local offset = Vector(0,0,0)
 
-    local model = ragdoll:GetModel()
-    local lower = string.lower(model)
-    if string.find(string.lower(model), "female") then
-        print("gosto de pennis")
-    end
-
-    if goremod_Customgapgapgapsahur[bone_name] then
+    if goremod_Customgapgapgapsahur[bone_name] and not goremod_model_gap_blacklist[model] then
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
         print(gib_data.model)
         local gap = ents.Create("prop_dynamic")
         local lpos, lang = WorldToLocal(bonepos,bone_rotation, ragdoll:GetBonePosition(bone_parent))
+
+        if gib_data.fem_offset then
+            local lower = string.lower(model)
+            if string.find(string.lower(model), "female") then
+                gib_data.offset = gib_data.fem_offset
+            end
+        end
+
 
         if not IsValid(gap) then return end
         gap:SetModel(gib_data.model)               
@@ -39,7 +55,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
         gap:SetNotSolid(true)
         gap:DrawShadow(false)
 
-        gap:ManipulateBoneScale(0, capScale) --gap scale
+        gap:ManipulateBoneScale(0, gib_data.capScale) --gap scale
         gap:FollowBone(ragdoll, bone_parent)
 
         gap:SetLocalAngles(gib_data.localAng)

@@ -18,6 +18,31 @@ function GetClosestPhysBone(ragdoll,dmg_data)
     })
 	return tr
 end
+function GetClosestPhysBone_on_ragdoll(ragdoll,pos)
+	local closest_distance = -1
+	local closest_bone = -1
+
+	if !ragdoll.gib_bone then
+		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+	end
+	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
+		local bone = ragdoll:TranslatePhysBoneToBone(i)
+		
+		if bone and ragdoll.gib_bone[i] ~= i then 
+			local phys = ragdoll:GetPhysicsObjectNum(i)
+			
+			if IsValid(phys) and pos then
+				local distance = phys:GetPos():Distance(pos)
+				
+				if (distance < closest_distance || closest_distance == -1) then
+					closest_distance = distance
+					closest_bone = i
+				end
+			end
+		end
+	end
+	return closest_bone
+end
 function colideBone(ragdoll,phys_bone)
 	local colide = ragdoll:GetPhysicsObjectNum( phys_bone ) --get bone id
 	colide:EnableCollisions(false)

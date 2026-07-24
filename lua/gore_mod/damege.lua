@@ -17,22 +17,21 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
 			end 
             
 			local dmg_force = dmginfo:GetDamage()
-			local hit = GetClosestPhysBone(ragdoll,dmg_data) --get hit physbone
-            if hit.PhysicsBone == nil then
+			local hit = GetClosestPhysBone_on_ragdoll(ragdoll,dmginfo:GetDamagePosition()) --get hit physbone
+            if hit == nil then
 				return 
 			end
-            local PhysicsBone = hit.PhysicsBone
-			local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
+			local bone = ragdoll:TranslatePhysBoneToBone(hit)
 			local bone_name = ragdoll:GetBoneName( bone ) 	
             print(bone_name)
 
             local damageForce = dmg_data.dmg_force:Length()
-            if ragdoll.gore_mod_boneHealth[PhysicsBone] then
-				ragdoll.gore_mod_boneHealth[PhysicsBone] = ragdoll.gore_mod_boneHealth[PhysicsBone] - dmginfo:GetDamage()
-				print("health"..ragdoll.gore_mod_boneHealth[PhysicsBone])
+            if ragdoll.gore_mod_boneHealth[hit] then
+				ragdoll.gore_mod_boneHealth[hit] = ragdoll.gore_mod_boneHealth[hit] - dmginfo:GetDamage()
+				print("health"..ragdoll.gore_mod_boneHealth[hit])
 			end
 
-			if ragdoll.gore_mod_boneHealth[PhysicsBone] <= 0 and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone and doDamege == true then 
+			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and doDamege == true then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     dmg_data.slice = true 
                 else

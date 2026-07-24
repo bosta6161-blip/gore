@@ -64,7 +64,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                         timer.Remove("PropFadeOut_" .. ragdoll:EntIndex())
                         local NoDecalFilter = {ragdoll}
 					    util.Decal("Scorch", ragdoll:GetPos(), ragdoll:GetPos() - Vector(0, 0, 50), NoDecalFilter) 
-                        ragdoll:Remove()
+
                     end
                 end)
             end)
