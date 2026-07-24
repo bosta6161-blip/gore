@@ -31,8 +31,37 @@ net.Receive( "noob_gore_benemerge", function()
 	end
 
 	ragdoll:SnatchModelInstance(ent)
-    ragdoll:AddCallback("BuildBonePositions",GibCallback)
+
+	ragdoll:AddCallback("BuildBonePositions",GibCallback)
+	timer.Simple(1, function()
+    	ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
+        	if IsValid(ragdoll) then
+            	ragdoll:Remove()
+        	end
+    	end)
+	end)
 end )
+
+/*
+hook.Add("CreateClientsideRagdoll", "CreateClientsideRagdoll_Ent", function( ent, rag )
+	local main_bone = 6
+	rag.is_a_ragdoll_gib = true 
+    rag.slice_gib = {} 
+	rag.main_bone = main_bone
+	rag.slice_gib[main_bone] = main_bone
+    sigma_children2(rag,main_bone)
+    local PhysBone = rag:TranslateBoneToPhysBone(main_bone)
+	for i=0, rag:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
+		local bone = rag:TranslatePhysBoneToBone(i)
+		if rag.slice_gib[bone] ~= bone then
+
+		end
+	end
+	rag:AddCallback("BuildBonePositions",GibCallback)
+	--rag:Remove()
+end)
+*/
+
 function colideBone2(ragdoll,phys_bone)
 	local colide = ragdoll:GetPhysicsObjectNum( phys_bone ) --get bone id
 	colide:EnableCollisions(false)
@@ -84,9 +113,9 @@ function SetRagdollPos69(ent,ent2)
 	
 end
 function GibCallback(myself, boneCount)
-	if not myself:GetParent():IsValid() then
-		myself:Remove()
-		print("aids")
+
+	if not myself:IsValid() then
+		myself:Remove() return 
 	end
     for i = 0, boneCount - 1 do
         if myself.slice_gib[i] ~= i then

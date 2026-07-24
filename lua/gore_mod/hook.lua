@@ -1,8 +1,8 @@
 goremod_Customgapgapgapsahur = {
     ["ValveBiped.Bip01_Head1"] = {
-        model = "models/mosi/fnv/props/character/headcap.mdl",
-        localAng = Angle(90,-90,-132),
-        offset = Vector(-0.02,-3.28,0),
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
+        localAng = Angle(180,110,90),
+        offset = Vector(-0.812,-2.608,0),
         capScale = Vector(1, 1, 1)
     },
     ["ValveBiped.Bip01_Spine2"] = {
@@ -21,6 +21,12 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     local localAng = Angle(0, 0, 0)
     local offset = Vector(0,0,0)
 
+    local model = ragdoll:GetModel()
+    local lower = string.lower(model)
+    if string.find(string.lower(model), "female") then
+        print("gosto de pennis")
+    end
+
     if goremod_Customgapgapgapsahur[bone_name] then
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
         print(gib_data.model)
@@ -32,8 +38,6 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
         gap:Spawn()
         gap:SetNotSolid(true)
         gap:DrawShadow(false)
- 
-        SafeRemoveEntityDelayed(meme, 15)
 
         gap:ManipulateBoneScale(0, capScale) --gap scale
         gap:FollowBone(ragdoll, bone_parent)

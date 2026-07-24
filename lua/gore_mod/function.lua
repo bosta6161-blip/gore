@@ -26,7 +26,6 @@ function colideBone(ragdoll,phys_bone)
 	colide:SetMaterial("gmod_silent")
 	colide:Sleep()
 	colide:EnableMotion(false)
-	colide:EnableMotion(false)
 	colide:SetBuoyancyRatio(0)
 	colide:AddGameFlag(1024) 
 	colide:EnableGravity(false)
@@ -201,10 +200,9 @@ hook.Add("Think", "ForcePhysbonePositions_Think_sigma", function()
 		if ragdoll.gib_bone then
 			ForcePhysBonePos(ragdoll) 
 		end
-
 	end
 end)
-timer.Create( "limb_bone_timer",0.5, 0, function() 
+timer.Create( "limb_bone_timer",0.1, 0, function() 
 	--print("inside") 
 	for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
 		if not ragdoll:IsValid() then
