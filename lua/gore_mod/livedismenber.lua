@@ -21,7 +21,6 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
             npc.RightArmDestroid = true
             npc:DropWeapon()
             npc:SetEnemy(NULL)
-            npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
 
             hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
             destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
@@ -31,7 +30,9 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
         npc.LeftArmHealth = npc.LeftArmHealth - dmg_data.dmg
         if npc.LeftArmHealth < 0 then
             npc.LeftArmDestroid = true
-            npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
+            if not npc.IsLambdaPlayer then
+                npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
+            end
             npc:SetEnemy(NULL)
             npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
             hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name

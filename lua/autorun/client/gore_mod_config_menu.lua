@@ -105,9 +105,9 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_CheckBox(content,"Acid efect","acid_efect_EXPEREMENTAL")
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to skeleton.",true)
         elseif name == "Effects Option" then
-            gore_mod_Add_slider(content,"limb_health_multiplier","limb_health_multiplier")
+            gore_mod_Add_slider(content,"limb health multiplier","limb_health_multiplier")
             gore_mod_Add_label(content,"multiplies the health of the members.",true )
-            gore_mod_Add_slider(content,"root_bone_health_multiplier","root_bone_health_multiplier")
+            gore_mod_Add_slider(content,"root bone health multiplier","root_bone_health_multiplier")
         elseif name == "About" then
             local text = vgui.Create("DLabel", content)
             text:SetText("My Config Menu\nVersion 1.0")

@@ -31,6 +31,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             dmg_total_damege = owner.dmg_total_damege,
             slice = false 
         }
+
         if owner.isdissolverd then
             if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
                 dmg_data.dmg_total_damege = 0
@@ -117,6 +118,9 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                 end
             end
             dmg_data.slice = false  
+            if dmg_data.dmg_force == nil then
+                return 
+            end
             local hit = gore_mod_GetClosestPhysBone(ragdoll,dmg_data)
             local PhysicsBone = hit.PhysicsBone
             local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
