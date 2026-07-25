@@ -23,6 +23,31 @@ goremod_Customgapgapgapsahur = {
         localAng = Angle(-75.366,-69.060,0),
         offset = Vector(5.579,-4.392,2.039),
         capScale = Vector(1.1, 1.1,1.1),
+    },
+    ["ValveBiped.Bip01_R_Calf"] = {
+        model = "models/noob_dev2323/gib/l4d/leg.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(12.127,2.926,0.554),
+        capScale = Vector(1, 1, 1),
+    },
+    ["ValveBiped.Bip01_L_Calf"] = {
+        model = "models/noob_dev2323/gib/l4d/leg.mdl",
+        localAng = Angle(-90,-12.281,0),
+        offset = Vector(14.854,2.772,-0.734),
+        capScale = Vector(0.919, 1, 1),
+        fem_offset = Vector(12.176,2.772,-0.734) 
+    },
+    ["ValveBiped.Bip01_L_Foot"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(12.654,-0.354,-0.507),
+        capScale = Vector(0.472,0.611,0.482),
+    },
+    ["ValveBiped.Bip01_R_Foot"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(12.654,0.354,0.507),
+        capScale = Vector(0.472,0.611,0.482),
     }
 }
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
