@@ -1,3 +1,4 @@
+gap_opdate = {}
 goremod_Customgapgapgapsahur = {
     ["ValveBiped.Bip01_Head1"] = {
         model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
@@ -39,16 +40,40 @@ goremod_Customgapgapgapsahur = {
     },
     ["ValveBiped.Bip01_L_Foot"] = {
         model = "models/noob_dev2323/gib/l4d/gib.mdl",
-        localAng = Angle(-90,0,0),
-        offset = Vector(12.654,-0.354,-0.507),
-        capScale = Vector(0.472,0.611,0.482),
+        localAng = Angle(-83.277,0,0),
+        offset = Vector(13.290,0,-0.549),
+        capScale = Vector(0.478,0.478,0.478),
     },
     ["ValveBiped.Bip01_R_Foot"] = {
         model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-96.600,0,0),
+        offset = Vector(13.447,0,-0.009),
+        capScale = Vector(0.478,0.478,0.478),
+    },
+    ["ValveBiped.Bip01_L_Forearm"] = {
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+        localAng = Angle(-90,0,-6.882),
+        offset = Vector(10,0.259,-0.6),
+        capScale = Vector(0.848,0.848,0.848),
+    },
+    ["ValveBiped.Bip01_R_Forearm"] = {
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+        localAng = Angle(-90,0,-6.882),
+        offset = Vector(10,0.253,0.342),
+        capScale = Vector(0.927,1,1),
+    },
+    ["ValveBiped.Bip01_R_Hand"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
         localAng = Angle(-90,0,0),
-        offset = Vector(12.654,0.354,0.507),
-        capScale = Vector(0.472,0.611,0.482),
-    }
+        offset = Vector(8.319,0,0.530),
+        capScale = Vector(0.366,0.366,0.258),
+    },
+    ["ValveBiped.Bip01_L_Hand"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(8.319,0,-0.530),
+        capScale = Vector(0.366,0.366,0.258),
+    },
 }
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
@@ -62,6 +87,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
     if goremod_Customgapgapgapsahur[bone_name] and not goremod_model_gap_blacklist[model] then
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
+        offset = gib_data.offset
         print(gib_data.model)
         local gap = ents.Create("prop_dynamic")
         local lpos, lang = WorldToLocal(bonepos,bone_rotation, ragdoll:GetBonePosition(bone_parent))
@@ -69,7 +95,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
         if gib_data.fem_offset then
             local lower = string.lower(model)
             if string.find(string.lower(model), "female") then
-                gib_data.offset = gib_data.fem_offset
+                offset = gib_data.fem_offset
             end
         end
 
@@ -84,9 +110,22 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
         gap:FollowBone(ragdoll, bone_parent)
 
         gap:SetLocalAngles(gib_data.localAng)
-        gap:SetLocalPos(lpos + gib_data.offset)
+        gap:SetLocalPos(lpos + offset)
+        gap.is_a_gore_gap = true 
+        gap.bone_flower = bone_parent
     end
 end )
+hook.Add("Think", "UpdateFollower", function()
+    for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
+        for _,gap in ipairs(ragdoll:GetChildren()) do
+            if gap:GetClass() == "prop_dynamic" and gap.is_a_gore_gap then
+                local pos, ang = ragdoll:GetBonePosition(gap.bone_flower)
+                gap:SetPos(pos)
+                gap:SetAngles(ang)
+            end
+	    end
+	end
+end)
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
     if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
         bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])

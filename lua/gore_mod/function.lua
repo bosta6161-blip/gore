@@ -1,7 +1,8 @@
 local ENT = FindMetaTable("Entity")
 util.AddNetworkString( "noob_gore_gib_npc_bone" )
 util.AddNetworkString( "noob_gore_benemerge" )
-
+util.AddNetworkString( "noob_gore_aids" )
+gib_PhysBone_RAGDOLLS = {}
 gore_mod_slice_damege = {
 	1,
 	4,
@@ -215,7 +216,7 @@ function sigma_scale(ragdoll)
 		end
 	end
 end
-gib_PhysBone_RAGDOLLS = {}
+
 
 hook.Add("Think", "ForcePhysbonePositions_Think_sigma", function()
     for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
