@@ -85,7 +85,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     local localAng = Angle(0, 0, 0)
     local offset = Vector(0,0,0)
 
-    if goremod_Customgapgapgapsahur[bone_name] and not goremod_model_gap_blacklist[model] then
+    if goremod_Customgapgapgapsahur[bone_name] and not goremod_model_gap_blacklist[model] and not ragdoll.nogap then
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
         offset = gib_data.offset
         print(gib_data.model)
@@ -111,24 +111,11 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
         gap:SetLocalAngles(gib_data.localAng)
         gap:SetLocalPos(lpos + offset)
-        gap.is_a_gore_gap = true 
-        gap.bone_flower = bone_parent
     end
 end )
-hook.Add("Think", "UpdateFollower", function()
-    for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
-        for _,gap in ipairs(ragdoll:GetChildren()) do
-            if gap:GetClass() == "prop_dynamic" and gap.is_a_gore_gap then
-                local pos, ang = ragdoll:GetBonePosition(gap.bone_flower)
-                gap:SetPos(pos)
-                gap:SetAngles(ang)
-            end
-	    end
-	end
-end)
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
     if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
-        bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
+        gore_mod_bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
     end
 end )
 hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_name,dmg_data)

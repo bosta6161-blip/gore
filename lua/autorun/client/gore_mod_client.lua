@@ -2,7 +2,7 @@ net.Receive( "noob_gore_benemerge", function()
     local ent = net.ReadEntity()
     local main_bone = net.ReadInt( 8 ) -- use the same number of bits that were written.
 	local ragdoll_parent = net.ReadEntity()
-	if not ragdoll_parent:IsValid() then
+	if not ent:IsValid() then
 		return 
 	end
 
@@ -33,13 +33,13 @@ net.Receive( "noob_gore_benemerge", function()
 	ragdoll:SnatchModelInstance(ent)
 
 	ragdoll:AddCallback("BuildBonePositions",GibCallback)
-	timer.Simple(1, function()
-    	ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
-        	if IsValid(ragdoll) then
-            	ragdoll:Remove()
-        	end
-    	end)
-	end)
+	if ragdoll_parent:IsValid() then
+		ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
+			if IsValid(ragdoll) then
+				ragdoll:Remove()
+			end
+		end)
+	end
 end )
 
 /*

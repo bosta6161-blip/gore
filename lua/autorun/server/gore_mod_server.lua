@@ -44,9 +44,10 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
 
             ragdoll:SetMaterial("models/charple/charple1_sheet") -- set material		
-            bonemerge_prop(ragdoll,"models/player/charple.mdl")
+            gore_mod_bonemerge_prop(ragdoll,"models/player/charple.mdl")
             ragdoll:Ignite(15,5)
             ragdoll:SetColor(Color(255, 255, 255, 255))
+            ragdoll.nogap = true 
 
             local alpha = 255
             
@@ -69,24 +70,24 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                 end)
             end)
 		end
-        ApplyCorpseEffects(ragdoll)
+        gore_mod_ApplyCorpseEffects(ragdoll)
 
         if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 then
-            gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+            gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
         else
             if owner.LeftArmDestroid or owner.RightArmDestroid then
                 dmg_data.slice = true 
                 if owner.RightArmDestroid then
-                    gib_PhysBone(ragdoll,"ValveBiped.Bip01_R_Forearm",dmg_data)
+                    gore_mod_gib_PhysBone(ragdoll,"ValveBiped.Bip01_R_Forearm",dmg_data)
                     hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
                 end
                 if owner.LeftArmDestroid then
-                    gib_PhysBone(ragdoll,"ValveBiped.Bip01_L_Forearm",dmg_data)
+                    gore_mod_gib_PhysBone(ragdoll,"ValveBiped.Bip01_L_Forearm",dmg_data)
                     hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
                 end
             end
             dmg_data.slice = false  
-            local hit = GetClosestPhysBone(ragdoll,dmg_data)
+            local hit = gore_mod_GetClosestPhysBone(ragdoll,dmg_data)
             local PhysicsBone = hit.PhysicsBone
             local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
             local bone_name = ragdoll:GetBoneName( bone ) 	
@@ -101,7 +102,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                 else
                     ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)                
                 end
-                dismember_limb(ragdoll,bone_name,dmg_data) 
+                gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
             end
         end
     end
@@ -113,7 +114,7 @@ hook.Add("OnEntityCreated", "On_shit_ent_is_created", function(ragdoll)
 		if GetConVar("can_gib_only_npc_corpse"):GetBool() == false and ragdoll:GetClass() == "prop_ragdoll" then 
 			timer.Simple(0, function()
 				if IsValid(ragdoll) and not ragdoll.destructible_Corpse then
-					ApplyCorpseEffects(ragdoll) 
+					gore_mod_ApplyCorpseEffects(ragdoll) 
 				end
 			end)
 		end

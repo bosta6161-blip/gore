@@ -17,7 +17,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
 			end 
             
 			local dmg_force = dmginfo:GetDamage()
-			local hit = GetClosestPhysBone_on_ragdoll(ragdoll,dmginfo:GetDamagePosition()) --get hit physbone
+			local hit = gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,dmginfo:GetDamagePosition()) --get hit physbone
             if hit == nil then
 				return 
 			end
@@ -39,12 +39,12 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 end
 
                 if bone == 0 then
-                    gib_ragdolll(ragdoll,dmg_data.dmg_force,true )    
+                    gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true )    
                 elseif ragdoll.main_bone_sigma == bone then
                     ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)
-                    gib_ragdolll(ragdoll,dmg_data.dmg_force)
+                    gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force)
                 else
-                    dismember_limb(ragdoll,bone_name,dmg_data) 
+                    gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
                 end
 			end
 		end 

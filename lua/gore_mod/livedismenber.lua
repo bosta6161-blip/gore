@@ -23,7 +23,7 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
             npc:SetEnemy(NULL)
             npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
 
-            bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_r.mdl")
+            hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
             destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
         end
     end
@@ -34,7 +34,7 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
             npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
             npc:SetEnemy(NULL)
             npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
-            bonemerge_prop(npc,"models/noob_dev2323/gib/upperarm_l.mdl")
+            hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
             destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
         end
     end
