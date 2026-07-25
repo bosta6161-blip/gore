@@ -119,6 +119,7 @@ hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_n
     end
 end )
 hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_name,dmg_data)
+    if ragdoll.no_gibs then return end
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
     local function get_custom_gibs( bone_name )
         if !goremod_CustomGibs[bone_name] then return nil end

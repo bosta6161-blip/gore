@@ -289,10 +289,13 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 	if !ragdoll.gib_bone then
 		ragdoll.gib_bone = {}
 	end
+	
 	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
 		local boneid = ragdoll:TranslatePhysBoneToBone(i)
 		local bone_name = ragdoll:GetBoneName(boneid)
 		local phys = ragdoll:GetPhysicsObjectNum(i)
+
+		ParticleEffect("blood_advisor_puncture",phys:GetPos(), ragdoll:GetAngles(), self)  
 		
 		if force == nil then
 			force = Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250))
@@ -345,7 +348,7 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-	if dmg_data.slice == true then
+	if dmg_data.slice == true and not ragdoll.no_limb then
 		gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 	else
 		ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
