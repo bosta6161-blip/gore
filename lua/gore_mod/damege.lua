@@ -23,7 +23,9 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
 			end
 			local bone = ragdoll:TranslatePhysBoneToBone(hit)
 			local bone_name = ragdoll:GetBoneName( bone ) 	
-            print(bone_name)
+            if GetConVar("gore_debug"):GetBool() then
+                print(bone_name.."is hit")
+            end
 
             local damageForce = dmg_data.dmg_force:Length()
             if ragdoll.gore_mod_boneHealth[hit] then

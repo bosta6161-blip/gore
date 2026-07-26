@@ -8,6 +8,7 @@ CreateConVar("root_bone_health_multiplier", "1", FCVAR_ARCHIVE, "root_bone_healt
 CreateConVar("can_npc_explode", "1", FCVAR_ARCHIVE, "can_npc_explode")
 
 CreateConVar("DMG_CRUSH_slice_ragdoll", "1", FCVAR_ARCHIVE, "DMG_CRUSH_slice_ragdoll")
+CreateConVar("Disable_ragdoll_colision", "1", FCVAR_ARCHIVE, "Disable_ragdoll_colision")
 CreateConVar("gib_fade_time", "67", FCVAR_ARCHIVE, "gib_fade_time") 
 CreateConVar("sliced_ragdoll_fade_time", "30", FCVAR_ARCHIVE, "sliced_ragdoll_fade_time")
 

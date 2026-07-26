@@ -127,7 +127,10 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
     	ragdollGIB:Spawn()
 		print(ragdollGIB)
-		ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+		if GetConVar("Disable_ragdoll_colision"):GetBool() then
+			ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+        end
+
 		for i = 1, #ragdoll:GetBodyGroups() do
 			ragdollGIB:SetBodygroup(i, ragdoll:GetBodygroup(i))
 		end
