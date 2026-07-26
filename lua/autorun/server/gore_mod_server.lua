@@ -11,11 +11,15 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
         if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
             if dmginfo:IsDamageType(DMG_DISSOLVE) then
                 npc.isdissolverd = true 
+            else
+                npc.isdissolverd = false  
             end
         end
         if GetConVar("acid_efect_EXPEREMENTAL"):GetBool() then
             if dmginfo:IsDamageType(DMG_ACID) then
                 npc.is_melt = true 
+            else
+                npc.is_melt = false  
             end
         end
     end
@@ -23,6 +27,7 @@ end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
     if owner.is_madness_combat_npc == true then return end
     if GetConVar("gore_enable"):GetBool() then
+        ragdoll:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         local dmg_data = {
             dmg_type = owner.dmg_type,
             dmg_pos = owner.dmg_pos,
@@ -35,6 +40,9 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
         if owner.isdissolverd then
             if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
                 dmg_data.dmg_total_damege = 0
+                ragdoll.nogap = true 
+                ragdoll.no_limb = true 
+                ragdoll.no_gibs = true 
 		        for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 			        local colide = ragdoll:GetPhysicsObjectNum( i )
 			        colide:EnableGravity(true )

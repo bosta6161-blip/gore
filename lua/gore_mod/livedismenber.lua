@@ -1,71 +1,77 @@
+gore_mod_npc_live_table = {}
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
-    if GetConVar("gore_enable"):GetBool() == false then return end
-    if GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() == false then return end
-    if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
-	if not npc.LeftArmHealth then
-		npc.RightArmHealth = npc:GetMaxHealth()/1.6
-		npc.LeftArmHealth = npc:GetMaxHealth()/1.6
-    end
-
-    local dmg_data = {
-        dmg_type = dmginfo:GetDamageType(),
-        dmg_pos = dmginfo:GetDamagePosition(),
-        dmg_force = dmginfo:GetDamageForce(),
-        dmg = dmginfo:GetDamage(),
-        no_tiny_gibs = true,
-        slice = false 
-    }
-    if hitgroup == HITGROUP_RIGHTARM and not npc.RightArmDestroid then
-        npc.RightArmHealth = npc.RightArmHealth - dmg_data.dmg
-        if npc.RightArmHealth < 0 then
-            npc.RightArmDestroid = true
-            npc:DropWeapon()
-            npc:SetEnemy(NULL)
-
-            hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
-            destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
+    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() then
+        if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
+        if not npc.LeftArmHealth then
+            npc.RightArmHealth = npc:GetMaxHealth()/1.6
+            npc.LeftArmHealth = npc:GetMaxHealth()/1.6
+            table.insert(gore_mod_npc_live_table, npc)
         end
-    end
-    if hitgroup == HITGROUP_LEFTARM and not npc.LeftArmDestroid then
-        npc.LeftArmHealth = npc.LeftArmHealth - dmg_data.dmg
-        if npc.LeftArmHealth < 0 then
-            npc.LeftArmDestroid = true
-            if not npc.IsLambdaPlayer then
-                npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
+
+        local dmg_data = {
+            dmg_type = dmginfo:GetDamageType(),
+            dmg_pos = dmginfo:GetDamagePosition(),
+            dmg_force = dmginfo:GetDamageForce(),
+            dmg = dmginfo:GetDamage(),
+            no_tiny_gibs = true,
+            slice = false 
+        }
+        if hitgroup == HITGROUP_RIGHTARM and not npc.RightArmDestroid then
+            npc.RightArmHealth = npc.RightArmHealth - dmg_data.dmg
+            if npc.RightArmHealth < 0 then
+                npc.RightArmDestroid = true
+                npc:DropWeapon()
+                npc:SetEnemy(NULL)
+
+                hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
+                destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
             end
-            npc:SetEnemy(NULL)
-            npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
-            hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
-            destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
+        end
+        if hitgroup == HITGROUP_LEFTARM and not npc.LeftArmDestroid then
+            npc.LeftArmHealth = npc.LeftArmHealth - dmg_data.dmg
+            if npc.LeftArmHealth < 0 then
+                npc.LeftArmDestroid = true
+                if not npc.IsLambdaPlayer then
+                    npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
+                end
+                npc:SetEnemy(NULL)
+                npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+                hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
+                destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
+            end
         end
     end
 end)
 
 
 hook.Add("Think","ArmCripple_AI",function()
-    for _,npc in ipairs(ents.GetAll()) do
-        if not npc:IsNPC() then continue end
-        if npc.LeftArmDestroid then
-            local sched = npc:GetCurrentSchedule()
-            local act   = npc:GetActivity()
+    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() then
+        for _,npc in ipairs( gore_mod_npc_live_table ) do
+            if not npc:IsValid() then
+                table.RemoveByValue(gore_mod_npc_live_table, npc) --remove ragdoll on the table
+            end
+            if npc.LeftArmDestroid then
+                local sched = npc:GetCurrentSchedule()
+                local act   = npc:GetActivity()
 
-            if not npc.DroppedWeaponAlready then
-                if sched == SCHED_RELOAD or act == ACT_RELOAD then
-                    npc.DroppedWeaponAlready = true
+                if not npc.DroppedWeaponAlready then
+                    if sched == SCHED_RELOAD or act == ACT_RELOAD then
+                        npc.DroppedWeaponAlready = true
 
-                    npc:DropWeapon()
-
-                    npc:SetEnemy(NULL)
-                    npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+                        npc:DropWeapon()
+                        npc:SetEnemy(NULL)
+                        npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
+                    end
                 end
             end
         end
     end
+
 end)
 
 function destroy_npc_limb(npc,bonename,dmg_data)
     if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
-        decap_ragdoll(npc,bonename,dmg_data)
+        gore_mod_decap_ragdoll(npc,bonename,dmg_data)
     else
         --ParticleEffect("blood_advisor_puncture", npc:GetBonePosition(npc:LookupBone(bonename)), npc:GetAngles(), self)       
         make_npc_gibs(npc,bonename,dmg_data)

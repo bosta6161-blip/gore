@@ -76,9 +76,7 @@ goremod_Customgapgapgapsahur = {
     },
 }
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
-    local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-    local bone_parent = ragdoll:GetBoneParent(bone_id)
-    local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
+
 
     local model = ragdoll:GetModel()
     local capScale = Vector(1, 1, 1)
@@ -86,6 +84,10 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     local offset = Vector(0,0,0)
 
     if goremod_Customgapgapgapsahur[bone_name] and not goremod_model_gap_blacklist[model] and not ragdoll.nogap then
+        local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+        local bone_parent = ragdoll:GetBoneParent(bone_id)
+        local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
+
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
         offset = gib_data.offset
         print(gib_data.model)

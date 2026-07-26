@@ -273,7 +273,7 @@ function goremod_make_dust(ragdoll)
 		gib:SetPos(downTrace.HitPos - Vector(0,0,0.7)) 
         local ang = downTrace.HitNormal:Angle()
         ang:RotateAroundAxis(ang:Right(), -90)
-		gib:SetAngles(ang)
+		gib:SetAngles(ang + Angle(0,math.Rand(-360, 360),0))
         gib:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
         gib:Spawn()
 		
