@@ -32,11 +32,13 @@ function ENT:Use(ply)
 	end
 end
 function ENT:Think()
-	timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
-		if IsValid(self) then
-			self:Remove()
-		end
-	end)
+	if GetConVar("sliced_ragdoll_fade_time"):GetFloat() < 998 then
+		timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
+			if IsValid(self) then
+				self:Remove()
+			end
+		end)
+	end
 end
 function ENT:PhysicsCollide(data, physobj)
 	if math.random(1, 8) == 1 then

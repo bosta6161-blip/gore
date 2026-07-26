@@ -33,13 +33,16 @@ net.Receive( "noob_gore_benemerge", function()
 	ragdoll:SnatchModelInstance(ent)
 
 	ragdoll:AddCallback("BuildBonePositions",GibCallback)
-	if ragdoll_parent:IsValid() then
-		ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
-			if IsValid(ragdoll) then
-				ragdoll:Remove()
-			end
-		end)
-	end
+	timer.Simple(0, function()
+		if ragdoll_parent:IsValid() then
+			ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
+				if IsValid(ragdoll) then
+					ragdoll:Remove()
+				end
+			end)
+		end
+	end)
+
 end )
 
 /*

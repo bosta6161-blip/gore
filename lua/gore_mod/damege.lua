@@ -28,12 +28,19 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
             local damageForce = dmg_data.dmg_force:Length()
             if ragdoll.gore_mod_boneHealth[hit] then
 				ragdoll.gore_mod_boneHealth[hit] = ragdoll.gore_mod_boneHealth[hit] - dmginfo:GetDamage()
-				print("health"..ragdoll.gore_mod_boneHealth[hit])
+                if GetConVar("gore_debug"):GetBool() then
+				    print(bone_name.." health"..ragdoll.gore_mod_boneHealth[hit])
+                end
 			end
 
 			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and doDamege == true then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
-                    dmg_data.slice = true 
+                    if dmg_data.dmg_type == 1 and GetConVar("DMG_CRUSH_slice_ragdoll"):GetBool() == false then
+                        dmg_data.slice = false     
+                    else
+                        dmg_data.slice = true 
+                    end
+
                 else
                     ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), ragdoll)
                 end

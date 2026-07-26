@@ -117,6 +117,7 @@ end
 
 function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     if ragdoll:LookupBone(bone_name) == nil or ragdoll:LookupBone(bone_name) == 0 then return end
+	if GetConVar("sliced_ragdoll_fade_time"):GetFloat() <= 0 then return end
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
 
 	local ragdollGIB = ents.Create("prop_ragdoll")
@@ -163,11 +164,14 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end
 		hook.Call( "noob_gore_gap_limb", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name) --call this hook to make cap based on bone name
 		gore_mod_ApplyCorpseEffects(ragdollGIB) 
-		timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
-			if IsValid(ragdollGIB) then
-				ragdollGIB:Remove()
-			end
-		end)
+		if GetConVar("sliced_ragdoll_fade_time"):GetFloat() < 998 then
+			timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
+				if IsValid(ragdollGIB) then
+					ragdollGIB:Remove()
+				end
+			end)	
+		end
+
 	end
 end 
 

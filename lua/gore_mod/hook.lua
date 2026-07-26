@@ -90,7 +90,6 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
         local gib_data = goremod_Customgapgapgapsahur[bone_name]
         offset = gib_data.offset
-        print(gib_data.model)
         local gap = ents.Create("prop_dynamic")
         local lpos, lang = WorldToLocal(bonepos,bone_rotation, ragdoll:GetBonePosition(bone_parent))
 
@@ -139,11 +138,14 @@ hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_
             end
         end
     elseif not dmg_data.no_tiny_gibs then
-        if dmg_data.bloodColor_is_YELLOW then
-            gore_mod_make_gibs(table.Random(BasicGib_Models),ragdoll:GetBonePosition(bone_id),dmg_data) 
-        else
-            for i = 1,math.random(1,3) do
-                gore_mod_make_gibs("models/props_junk/watermelon01_chunk02a.mdl",ragdoll:GetBonePosition(bone_id),dmg_data,true) 
+        local surfaceProp = ragdoll:GetBoneSurfaceProp(0)
+        if not surfaceProp == "metal" then
+            if dmg_data.bloodColor_is_YELLOW then
+                gore_mod_make_gibs(table.Random(BasicGib_Models),ragdoll:GetBonePosition(bone_id),dmg_data) 
+            else
+                for i = 1,math.random(1,3) do
+                    gore_mod_make_gibs("models/props_junk/watermelon01_chunk02a.mdl",ragdoll:GetBonePosition(bone_id),dmg_data,true) 
+                end
             end
         end
     end 

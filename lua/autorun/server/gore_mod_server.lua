@@ -18,8 +18,6 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
         if GetConVar("acid_efect_EXPEREMENTAL"):GetBool() then
             if dmginfo:IsDamageType(DMG_ACID) then
                 npc.is_melt = true 
-            else
-                npc.is_melt = false  
             end
         end
     end
@@ -86,32 +84,24 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             end)
 		end
         if owner.is_melt and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then
-            ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
-            gore_mod_bonemerge_prop(ragdoll,"models/player/skeleton.mdl")
-            ragdoll:SetColor(Color(255, 255, 255, 255))
-            ragdoll.nogap = true 
-            ragdoll.no_limb = true 
-            ragdoll.no_gibs = true 
-            local alpha = 255
-
-            --ParticleEffectAttach("smoke_gib_01",PATTACH_ABSORIGIN_FOLLOW,ragdoll,0)  
-            timer.Create("PropFadeOut_" .. ragdoll:EntIndex(), 0.05, 100, function()
+            timer.Simple(1, function()
                 if not IsValid(ragdoll) then return end
-
-                alpha = math.max(alpha - 50, 0)
-                ragdoll:SetColor(Color(255, 255, 255, alpha))
-                if alpha <= 0 and not ragdoll.fucked then
-                    ragdoll.fucked = true 
-                    for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			            local colide = ragdoll:GetPhysicsObjectNum( i )
-                        ParticleEffect("blood_impact_green_01",colide:GetPos(), ragdoll:GetAngles(), self)     
-		            end
-                end
+                ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
+                gore_mod_bonemerge_prop(ragdoll,"models/player/skeleton.mdl")
+                ragdoll:SetColor(Color(255, 255, 255, 0))
+                ragdoll.nogap = true 
+                ragdoll.no_limb = true 
+                ragdoll.no_gibs = true 
+                for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+			        local colide = ragdoll:GetPhysicsObjectNum( i )
+                    ParticleEffect("blood_impact_green_01",colide:GetPos(), ragdoll:GetAngles(), self)     
+		        end
+                EmitSound( "npc/antlion/antlion_shoot1.wav",ragdoll:GetPos() )
             end)
         end
         gore_mod_ApplyCorpseEffects(ragdoll)
 
-        if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 then
+        if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and GetConVar("can_npc_explode"):GetBool() then
             gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
         else
             if owner.LeftArmDestroid or owner.RightArmDestroid then

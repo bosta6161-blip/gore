@@ -42,13 +42,19 @@ local function gore_mod_Add_label(parent,text,tiny)
 
     label:SizeToContents()
 end
-local function gore_mod_Add_slider(parent,text,convas_name)
+local function gore_mod_Add_slider(parent,text,convas_name,fade_time)
     local slider = vgui.Create("DNumSlider", parent)
     slider:Dock(TOP)
     slider:DockMargin(20,10,20,0)
     slider:SetText("")
-    slider:SetMin(-10)
-    slider:SetMax(10)
+    if fade_time then
+        slider:SetMin(0)
+        slider:SetMax(999)
+    else
+        slider:SetMin(-10)
+        slider:SetMax(10)
+    end
+
     slider:SetDecimals(1)
     slider:SetValue(GetConVar(convas_name):GetInt())	
 	slider:SetConVar(convas_name)		
@@ -95,7 +101,9 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_label(content,"Disable gore to only ragdolls spawned by NPCs/nextbots/players.",true)
             gore_mod_Add_CheckBox(content,"can destroy bodies","can_gib_ragdoll")
             gore_mod_Add_label(content,"After you kill the NPC, you can't destroy the body, this can help with performance when there's a lot going on.",true)
-            gore_mod_Add_label(content,"experimental may contain bugs.")
+            gore_mod_Add_CheckBox(content,"can NPC explode","can_npc_explode")
+            gore_mod_Add_label(content,"Disable NPC explode when die",true)
+        elseif name == "experimental" then
             gore_mod_Add_CheckBox(content,"dismember living NPC","live_dismenber_EXPEREMENTAL")
             gore_mod_Add_label(content,"NPC can lose limbs in combat.",true)
             gore_mod_Add_CheckBox(content,"burned corpse effect","burned_corpse_effect_EXPEREMENTAL")
@@ -104,10 +112,18 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to dust.",true)
             gore_mod_Add_CheckBox(content,"Acid efect","acid_efect_EXPEREMENTAL")
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to skeleton.",true)
-        elseif name == "Effects Option" then
+        elseif name == "Ragdoll Option" then
             gore_mod_Add_slider(content,"limb health multiplier","limb_health_multiplier")
             gore_mod_Add_label(content,"multiplies the health of the members.",true )
             gore_mod_Add_slider(content,"root bone health multiplier","root_bone_health_multiplier")
+            gore_mod_Add_slider(content,"gib fade time","gib_fade_time",true )
+            gore_mod_Add_label(content,"gib fade time.",true )
+            gore_mod_Add_slider(content,"sliced ragdoll fade time","sliced_ragdoll_fade_time",true )
+            gore_mod_Add_label(content,"sliced ragdoll fade time",true )
+            
+            gore_mod_Add_CheckBox(content,"Crush damege slice ragdoll","DMG_CRUSH_slice_ragdoll")
+            gore_mod_Add_label(content,"Disable ragdoll sliced when is crush",true)
+
         elseif name == "About" then
             local text = vgui.Create("DLabel", content)
             text:SetText("My Config Menu\nVersion 1.0")
@@ -136,7 +152,8 @@ function GoremodOpenConfirmMenu()
 
     local pages = {
         "General",
-        "Effects Option",
+        "Ragdoll Option",
+        "experimental",
         "About"
     }
 
