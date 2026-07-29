@@ -25,7 +25,7 @@ local function gore_mod_Add_CheckBox(parent,text,convas_name)
     checkbox:SetValue(GetConVar(convas_name):GetBool())						-- Initial value
     checkbox:SetTextColor(color_white)
     checkbox:Dock(TOP)
-    checkbox:DockMargin(20,5,20,0)
+    checkbox:DockMargin(20,2,20,0)
     checkbox:SizeToContents()
 	checkbox:SetConVar(convas_name)				-- Change a ConVar when the box it ticked/unticked
 end
@@ -42,20 +42,27 @@ local function gore_mod_Add_label(parent,text,tiny)
 
     label:SizeToContents()
 end
-local function gore_mod_Add_slider(parent,text,convas_name,fade_time)
+local function gore_mod_Add_slider(parent,text,convas_name,fade_time,notdecimal)
     local slider = vgui.Create("DNumSlider", parent)
     slider:Dock(TOP)
-    slider:DockMargin(20,10,20,0)
+    slider:DockMargin(20,5,20,0)
     slider:SetText("")
     if fade_time then
+        slider:SetDecimals(0)
         slider:SetMin(0)
         slider:SetMax(999)
     else
         slider:SetMin(-10)
         slider:SetMax(10)
     end
+    if notdecimal then
+        slider:SetMin(5)
+        slider:SetMax(50)
+        slider:SetDecimals(0)
+    else
+        slider:SetDecimals(1)
+    end
 
-    slider:SetDecimals(1)
     slider:SetValue(GetConVar(convas_name):GetInt())	
 	slider:SetConVar(convas_name)		
     slider.Paint = function(self, w, h)
@@ -121,8 +128,10 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_label(content,"Gib Option" )
             gore_mod_Add_slider(content,"gib fade time","gib_fade_time",true )
             gore_mod_Add_label(content,"gib fade time.",true )
-            gore_mod_Add_slider(content,"sliced ragdoll fade time","sliced_ragdoll_fade_time",true )
-            gore_mod_Add_label(content,"sliced ragdoll fade time",true )
+            gore_mod_Add_slider(content,"Ragdoll limb fade time","sliced_ragdoll_fade_time",true )
+            gore_mod_Add_label(content,"Ragdoll limb fade time",true )
+            gore_mod_Add_slider(content,"limb limit","sliced_ragdoll_limit",true,true )
+            gore_mod_Add_label(content,"Ragdoll limb can be espensive",true )
             gore_mod_Add_label(content,"Set value to max to make gib never fade" )
             
             gore_mod_Add_CheckBox(content,"Crush damege slice ragdoll","DMG_CRUSH_slice_ragdoll")

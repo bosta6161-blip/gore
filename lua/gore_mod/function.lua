@@ -3,6 +3,7 @@ util.AddNetworkString( "noob_gore_gib_npc_bone" )
 util.AddNetworkString( "noob_gore_benemerge" )
 util.AddNetworkString( "noob_gore_aids" )
 gib_PhysBone_RAGDOLLS = {}
+limb_ragdoll_count = {}
 gore_mod_slice_damege = {
 	1,
 	4,
@@ -150,13 +151,13 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 
 		ragdollGIB.gib_bone = {}
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
+		table.insert(limb_ragdoll_count, ragdollGIB)
 		if ragdoll.gib_bone then
 		for phys, v in pairs(ragdoll.gib_bone) do
 			local boneid = ragdoll:TranslatePhysBoneToBone(phys)
 			local bone_name2 = ragdoll:GetBoneName(boneid)
 			local main_bone = ragdollGIB:TranslateBoneToPhysBone(ragdollGIB.main_bone_sigma)
 			if phys ~= main_bone then
-							print(bone_name2)
 				local dmg_data = {
                 	slice = true  
             	}
@@ -251,6 +252,13 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 	end
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
+	if #limb_ragdoll_count > GetConVar("sliced_ragdoll_limit"):GetInt() then
+		if IsValid(limb_ragdoll_count[1]) then
+            limb_ragdoll_count[1]:Remove()
+        end
+    	table.remove(limb_ragdoll_count, 1)
+	end
+
 	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
 
 		local boneid = ragdoll:TranslatePhysBoneToBone(i)
@@ -261,11 +269,12 @@ function gore_mod_ForcePhysBonePos2(ragdoll)
 			local main_bone = ragdoll:TranslateBoneToPhysBone(ragdoll.main_bone_sigma)
 		
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
-			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone)
-			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0, 200 ),true)
+			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone) 
+			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,0),true)
 		end
 	end
 end
+
 function goremod_make_dust(ragdoll)
 	local startPos = ragdoll:GetBonePosition(0)
     local downTrace = util.TraceLine({

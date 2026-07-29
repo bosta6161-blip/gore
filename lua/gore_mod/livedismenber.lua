@@ -1,10 +1,11 @@
 gore_mod_npc_live_table = {}
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
-    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() then
+    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() and not npc.IsLambdaPlayer then
         if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
         if not npc.LeftArmHealth then
             npc.RightArmHealth = npc:GetMaxHealth()/1.6
             npc.LeftArmHealth = npc:GetMaxHealth()/1.6
+            npc.LeftLegHealth = npc:GetMaxHealth()/1.6
             table.insert(gore_mod_npc_live_table, npc)
         end
 
@@ -31,9 +32,7 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
             npc.LeftArmHealth = npc.LeftArmHealth - dmg_data.dmg
             if npc.LeftArmHealth < 0 then
                 npc.LeftArmDestroid = true
-                if not npc.IsLambdaPlayer then
-                    npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
-                end
+                npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
                 npc:SetEnemy(NULL)
                 npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
                 hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
