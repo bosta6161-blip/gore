@@ -36,3 +36,4 @@ function gib_npc_Bone_cl(npc,bone_name)
         gib_npc_Bone_cl(npc,bone_children_name)
     end
 end
+

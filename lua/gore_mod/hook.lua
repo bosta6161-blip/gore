@@ -1,4 +1,3 @@
-gap_opdate = {}
 goremod_Customgapgapgapsahur = {
     ["ValveBiped.Bip01_Head1"] = {
         model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
@@ -77,6 +76,7 @@ goremod_Customgapgapgapsahur = {
 }
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
+    if !ragdoll.aids then ragdoll.aids = {} end
 
     local model = ragdoll:GetModel()
     local capScale = Vector(1, 1, 1)
@@ -112,6 +112,23 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
         gap:SetLocalAngles(gib_data.localAng)
         gap:SetLocalPos(lpos + offset)
+        gap.bonename_parent = bone_name
+        gap.is_gap = true 
+        local function gore_mod_sigma_children_gib(ragdoll,bone_name)
+            local sigma = ragdoll:GetChildBones(ragdoll:LookupBone(bone_name))
+            for k, v in pairs(sigma) do --no more shit code
+                for _,child in ipairs( ragdoll:GetChildren() ) do
+                    print(child) 
+                    if child.bonename_parent == ragdoll:GetBoneName(v) then
+                        print(child.bonename_parent)
+                        child:Remove()
+                    end
+                end
+                gore_mod_sigma_children_gib(ragdoll,ragdoll:GetBoneName(v))
+            end
+        end
+
+        gore_mod_sigma_children_gib(ragdoll,bone_name)
     end
 end )
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
