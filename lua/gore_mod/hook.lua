@@ -120,7 +120,6 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
                 for _,child in ipairs( ragdoll:GetChildren() ) do
                     print(child) 
                     if child.bonename_parent == ragdoll:GetBoneName(v) then
-                        print(child.bonename_parent)
                         child:Remove()
                     end
                 end

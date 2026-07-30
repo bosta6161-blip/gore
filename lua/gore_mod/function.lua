@@ -279,7 +279,7 @@ function gore_mod_ForcePhysBonePos2(ragdoll)
 		
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone) 
-			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,90),true)
+			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,85),true)
 		end
 	end
 end

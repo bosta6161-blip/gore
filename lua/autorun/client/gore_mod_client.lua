@@ -31,18 +31,7 @@ net.Receive( "noob_gore_benemerge", function()
 	end
 
 	ragdoll:SnatchModelInstance(ent)
-
 	ragdoll:AddCallback("BuildBonePositions",GibCallback)
-	timer.Simple(0, function()
-		if ragdoll_parent:IsValid() then
-			ragdoll_parent:CallOnRemove("Remove_" .. ragdoll:EntIndex(), function()
-				if IsValid(ragdoll) then
-					ragdoll:Remove()
-				end
-			end)
-		end
-	end)
-
 end )
 
 /*
@@ -116,9 +105,8 @@ function SetRagdollPos69(ent,ent2)
 	
 end
 function GibCallback(myself, boneCount)
-
-	if not myself:IsValid() then
-		myself:Remove() return 
+	if not myself:GetParent():IsValid() then
+		myself:Remove() 
 	end
     for i = 0, boneCount - 1 do
         if myself.slice_gib[i] ~= i then
