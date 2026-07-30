@@ -150,21 +150,25 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end)
 
 		ragdollGIB.gib_bone = {}
+		if ragdoll.bonegap_for_limb then
+			ragdollGIB.bonegap_for_limb = ragdoll.bonegap_for_limb
+		end
+
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
 		table.insert(limb_ragdoll_count, ragdollGIB)
-		if ragdoll.gib_bone then
-		for phys, v in pairs(ragdoll.gib_bone) do
-			local boneid = ragdoll:TranslatePhysBoneToBone(phys)
-			local bone_name2 = ragdoll:GetBoneName(boneid)
-			local main_bone = ragdollGIB:TranslateBoneToPhysBone(ragdollGIB.main_bone_sigma)
-			if phys ~= main_bone then
-				local dmg_data = {
-                	slice = true  
-            	}
-				gore_mod_gib_PhysBone(ragdollGIB,bone_name2,dmg_data)
-				hook.Call( "noob_gore_gap", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name2) --call this hook to make cap based on bone name
+		if ragdoll.bonegap_for_limb then
+
+
+			for boneid, v in pairs(ragdoll.bonegap_for_limb) do
+				local bone_name2 = ragdoll:GetBoneName(boneid)
+				if boneid ~= ragdollGIB:GetBoneParent(ragdollGIB.main_bone_sigma) and boneid ~= ragdollGIB.main_bone_sigma and ragdollGIB.slice_gib[boneid] == boneid then
+					local dmg_data = {
+						slice = true  
+					}
+					gore_mod_gib_PhysBone(ragdollGIB,bone_name2,dmg_data)
+					hook.Call( "noob_gore_gap", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name2) --call this hook to make cap based on bone name
+				end
 			end
-		end
 		end
 		hook.Call( "noob_gore_gap_limb", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name) --call this hook to make cap based on bone name
 		gore_mod_ApplyCorpseEffects(ragdollGIB) 
@@ -174,9 +178,6 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 					ragdollGIB:Remove()
 				end
 			end)	
-		end
-		for boneid, v in pairs(ragdollGIB.slice_gib) do
-			print(ragdollGIB:GetBoneName(boneid))
 		end
 	end
 end 
@@ -201,7 +202,7 @@ function gore_mod_slice_gib(ragdoll,bone_name)
 		local bone = ragdoll:TranslatePhysBoneToBone(i)
 		if ragdoll.slice_gib[bone] ~= bone then
 			ragdoll:RemoveInternalConstraint(i) --remove ragdoll Constraint
-			gore_mod_ForcePhysBonePos2(ragdoll)
+			--gore_mod_ForcePhysBonePos2(ragdoll)
 			gore_mod_colideBone(ragdoll,i)
 		end
 	end
@@ -245,9 +246,6 @@ hook.Add("Think", "ForcePhysbonePositions_Think_sigma", function()
 		if ragdoll.gib_bone then
 			gore_mod_ForcePhysBonePos(ragdoll) 
 		end
-		if ragdoll.slice_gib then
-			gore_mod_ForcePhysBonePos2(ragdoll) 
-		end
 	end
 end)
 
@@ -261,6 +259,7 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 	end
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
+
 	if #limb_ragdoll_count > GetConVar("sliced_ragdoll_limit"):GetInt() then
 		if IsValid(limb_ragdoll_count[1]) then
             limb_ragdoll_count[1]:Remove()
@@ -275,11 +274,12 @@ function gore_mod_ForcePhysBonePos2(ragdoll)
 		local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 		if IsValid(phys) and ragdoll.slice_gib[boneid] ~= boneid then
+
 			local main_bone = ragdoll:TranslateBoneToPhysBone(ragdoll.main_bone_sigma)
 		
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone) 
-			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,0),true)
+			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,90),true)
 		end
 	end
 end
@@ -373,6 +373,10 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+	if !ragdoll.bonegap_for_limb then
+		ragdoll.bonegap_for_limb = {}
+	end
+	ragdoll.bonegap_for_limb[bone_id] = bone_id
 	if dmg_data.slice == true and not ragdoll.no_limb then
 		gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 	else
