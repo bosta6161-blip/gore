@@ -51,7 +51,7 @@ bone_name_togap = {
     },
     ["ValveBiped.Bip01_R_Forearm"] = {
         bonemerge = true,
-        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+        model = "models/noob_dev2323/gib/r_arm.mdl",
     }, 
     ["ValveBiped.Bip01_R_Hand"] = {
         model = "models/noob_dev2323/gib/l4d/gib.mdl",

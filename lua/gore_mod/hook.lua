@@ -14,7 +14,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
             local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
 
             local gib_data = bone_name_togap[bone_name]
-            if gib_data.bonemerge then
+            if gib_data.bonemerge then 
                 gore_mod_bonemerge_prop(ragdoll,gib_data.model)
             else
                 offset = gib_data.offset
