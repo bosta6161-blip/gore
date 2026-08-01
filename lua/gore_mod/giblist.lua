@@ -1,16 +1,83 @@
 bone_name_togap = {
-    ["ValveBiped.Bip01_L_Hand"] = "models/noob_dev2323/gib/l_arm.mdl",
-    ["ValveBiped.Bip01_R_Hand"] = "models/noob_dev2323/gib/r_arm.mdl",
-    ["ValveBiped.Bip01_L_Forearm"] = "models/noob_dev2323/gib/upperarm_l.mdl",
-	["ValveBiped.Bip01_R_Forearm"] = "models/noob_dev2323/gib/upperarm_r.mdl",
-	["ValveBiped.Bip01_R_Calf"] = "models/noob_dev2323/gib/r_leg_gap.mdl",
-    ["ValveBiped.Bip01_L_Calf"] = "models/noob_dev2323/gib/l_leg_gap.mdl",
-	["ValveBiped.Bip01_R_Foot"] = "models/noob_dev2323/gib/r_foot.mdl",
-	["ValveBiped.Bip01_L_Foot"] = "models/noob_dev2323/gib/l_foot.mdl",
-	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/head_gore2.mdl",
-	["ValveBiped.Bip01_Spine2"] = "models/noob_dev2323/gib/l4d/half1.mdl",
-	["ValveBiped.head"] = "models/noob_dev2323/gib/l4d/vortigount.mdl"
-} 
+    ["ValveBiped.Bip01_Head1"] = {
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
+        localAng = Angle(180,110,90),
+        offset = Vector(-0.812,-2.608,0),
+        capScale = Vector(1, 1, 1),
+        fem_offset = Vector(-2.912,-2.608,0) 
+    },
+    ["ValveBiped.Bip01_Spine2"] = {
+        model = "models/noob_dev2323/gib/l4d/half_bottom.mdl",
+        localAng = Angle(0, 90, 90),
+        offset = Vector(-2,2,0),
+        capScale = Vector(1.1, 1.1, 1.1) 
+    },
+    ["ValveBiped.Bip01_R_UpperArm"] = {
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/common_infected_w_r_arm_shoulder.mdl"
+    },
+    ["ValveBiped.Bip01_L_UpperArm"] = {
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/common_infected_w_l_arm_shoulder.mdl",
+    },
+    ["ValveBiped.Bip01_R_Calf"] = {
+        model = "models/noob_dev2323/gib/l4d/leg.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(12.127,2.926,0.554),
+        capScale = Vector(1, 1, 1),
+    },
+    ["ValveBiped.Bip01_L_Calf"] = {
+        model = "models/noob_dev2323/gib/l4d/leg.mdl",
+        localAng = Angle(-90,-12.281,0),
+        offset = Vector(14.854,2.772,-0.734),
+        capScale = Vector(0.919, 1, 1),
+        fem_offset = Vector(12.176,2.772,-0.734) 
+    },
+    ["ValveBiped.Bip01_L_Foot"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-83.277,0,0),
+        offset = Vector(13.290,0,-0.549),
+        capScale = Vector(0.478,0.478,0.478),
+    },
+    ["ValveBiped.Bip01_R_Foot"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-96.600,0,0),
+        offset = Vector(13.447,0,-0.009),
+        capScale = Vector(0.478,0.478,0.478),
+    },
+    ["ValveBiped.Bip01_L_Forearm"] = {
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+    },
+    ["ValveBiped.Bip01_R_Forearm"] = {
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+    }, 
+    ["ValveBiped.Bip01_R_Hand"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(8.319,0,0.530),
+        capScale = Vector(0.366,0.366,0.258),
+    },
+    ["ValveBiped.Bip01_L_Hand"] = {
+        model = "models/noob_dev2323/gib/l4d/gib.mdl",
+        localAng = Angle(-90,0,0),
+        offset = Vector(8.319,0,-0.530),
+        capScale = Vector(0.366,0.366,0.258),
+    },
+    ["ValveBiped.Bip01_L_Thigh"] = {
+        model = "models/noob_dev2323/gib/l4d/upper_leg_l.mdl",
+        localAng = Angle(-52.21,13.08,-103.5),
+        offset = Vector(3.4,-0.98,-1.01),
+        capScale = Vector(1, 1, 1),
+    },
+    ["ValveBiped.Bip01_R_Thigh"] = {
+        model = "models/noob_dev2323/gib/l4d/upper_leg_l.mdl",
+        localAng = Angle(-133.26,13.4,14.42),
+        offset = Vector(3.01,-1.94,-2.88),
+        capScale = Vector(1, 1, 1),
+    },
+}
 goremod_CustomGibs = {
     ["ValveBiped.Bip01_Head1"] = {
         gibs = {

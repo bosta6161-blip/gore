@@ -12,7 +12,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 slice = false 
             }
 			local doDamege = true 
-			if dmgType == DMG_CRUSH and dmginfo:GetDamage() < 500 then
+			if dmginfo:GetDamageType() == DMG_CRUSH and dmginfo:GetDamage() < 500 then
 				doDamege = false    
 			end 
             
@@ -28,7 +28,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
             end
 
             local damageForce = dmg_data.dmg_force:Length()
-            if ragdoll.gore_mod_boneHealth[hit] then
+            if ragdoll.gore_mod_boneHealth[hit] and doDamege == true then
 				ragdoll.gore_mod_boneHealth[hit] = ragdoll.gore_mod_boneHealth[hit] - dmginfo:GetDamage()
                 if GetConVar("gore_debug"):GetBool() then
 				    print(bone_name.." health"..ragdoll.gore_mod_boneHealth[hit])

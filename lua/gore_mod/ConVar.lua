@@ -13,6 +13,7 @@ CreateConVar("DMG_CRUSH_slice_ragdoll", "1", FCVAR_ARCHIVE, "DMG_CRUSH_slice_rag
 CreateConVar("Disable_ragdoll_colision", "1", FCVAR_ARCHIVE, "Disable_ragdoll_colision")
 CreateConVar("gib_fade_time", "67", FCVAR_ARCHIVE, "gib_fade_time") 
 CreateConVar("sliced_ragdoll_fade_time", "30", FCVAR_ARCHIVE, "sliced_ragdoll_fade_time")
+CreateConVar("ragdoll_has_gap_models", "1", FCVAR_ARCHIVE, "ragdoll_has_gap_models") 
 
 CreateConVar("sliced_ragdoll_limit", "25", FCVAR_ARCHIVE, "sliced_ragdoll_limit")
 
@@ -22,3 +23,4 @@ CreateConVar("live_dismenber_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "live_dismenber_
 CreateConVar("burned_corpse_effect_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "fire_damege_EXPEREMENTAL")
 CreateConVar("dissolve_efect_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "dissolve_efect_EXPEREMENTAL")
 CreateConVar("acid_efect_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "acid_efect_EXPEREMENTAL")
+CreateConVar("sawblade_slice_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "acid_efect_EXPEREMENTAL")

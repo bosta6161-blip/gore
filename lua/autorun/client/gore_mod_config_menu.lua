@@ -32,7 +32,7 @@ end
 local function gore_mod_Add_label(parent,text,tiny)
     local label = vgui.Create("DLabel", parent)
     if not tiny then
-        label:SetFont("Trebuchet24") 
+        label:SetFont("smash")
         label:DockMargin(20,20,20,10)
     else
         label:DockMargin(20,5,20,10)
@@ -112,6 +112,7 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_label(content,"Disable NPC explode when die",true)
             gore_mod_Add_CheckBox(content,"cannibalism","cannibalism")
             gore_mod_Add_label(content,"Eat gibs to restore life",true)
+            gore_mod_Add_CheckBox(content,"ragdoll has gore models","ragdoll_has_gap_models")
         elseif name == "experimental" then
             gore_mod_Add_CheckBox(content,"dismember living NPC","live_dismenber_EXPEREMENTAL")
             gore_mod_Add_label(content,"NPC can lose limbs in combat.",true)
@@ -121,6 +122,8 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to dust.",true)
             gore_mod_Add_CheckBox(content,"Acid efect","acid_efect_EXPEREMENTAL")
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to skeleton.",true)
+            gore_mod_Add_CheckBox(content,"sawblade slice","sawblade_slice_EXPEREMENTAL")
+            gore_mod_Add_label(content,"just like zombies.",true)
         elseif name == "Ragdoll Option" then
             gore_mod_Add_slider(content,"limb health multiplier","limb_health_multiplier")
             gore_mod_Add_label(content,"multiplies the health of the members.",true )

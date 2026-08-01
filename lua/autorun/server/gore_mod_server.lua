@@ -20,6 +20,11 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
                 npc.is_melt = true 
             end
         end
+        if dmginfo:IsDamageType(DMG_CRUSH) and dmginfo:IsDamageType(DMG_SLASH) then
+            npc.goremod_is_slice_inhalf = true 
+        else
+            npc.goremod_is_slice_inhalf = false  
+        end
     end
 end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
@@ -35,7 +40,33 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
             slice = false 
         }
 
-        if owner.isdissolverd then
+
+        
+        gore_mod_ApplyCorpseEffects(ragdoll)
+
+        if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and GetConVar("can_npc_explode"):GetBool() then
+            gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+        elseif owner.goremod_is_slice_inhalf and owner:LookupBone("ValveBiped.Bip01_Spine2") ~= nil and GetConVar("sawblade_slice_EXPEREMENTAL"):GetBool()then
+            dmg_data.slice = true 
+            dmg_data.dmg_force = Vector(0,0,16000)
+            ragdoll:EmitSound( "ambient/machines/slicer" .. math.random(1,4) .. ".wav", 120, 100, 1, CHAN_AUTO ) -- Same as below
+            gore_mod_dismember_limb(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data) 
+        elseif owner.is_melt and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then
+            timer.Simple(1, function()
+                if not IsValid(ragdoll) then return end
+                ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
+                gore_mod_bonemerge_prop(ragdoll,"models/player/skeleton.mdl")
+                ragdoll:SetColor(Color(255, 255, 255, 0))
+                ragdoll.nogap = true 
+                ragdoll.no_limb = true 
+                ragdoll.no_gibs = true 
+                for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+			        local colide = ragdoll:GetPhysicsObjectNum( i )
+                    ParticleEffect("blood_impact_green_01",colide:GetPos(), ragdoll:GetAngles(), self)     
+		        end
+                EmitSound( "npc/antlion/antlion_shoot1.wav",ragdoll:GetPos() )
+            end)
+        elseif owner.isdissolverd then
             if GetConVar("dissolve_efect_EXPEREMENTAL"):GetBool() then
                 dmg_data.dmg_total_damege = 0
                 ragdoll.nogap = true 
@@ -51,8 +82,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
 			        end
 		        end)
             end
-        end
-        if owner:IsOnFire() and GetConVar("burned_corpse_effect_EXPEREMENTAL"):GetBool() and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then --fire efect
+        elseif owner:IsOnFire() and GetConVar("burned_corpse_effect_EXPEREMENTAL"):GetBool() and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then --fire efect
             ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
 
             ragdoll:SetMaterial("models/charple/charple1_sheet") -- set material		
@@ -81,28 +111,7 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
 
                     end
                 end)
-            end)
-		end
-        if owner.is_melt and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then
-            timer.Simple(1, function()
-                if not IsValid(ragdoll) then return end
-                ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
-                gore_mod_bonemerge_prop(ragdoll,"models/player/skeleton.mdl")
-                ragdoll:SetColor(Color(255, 255, 255, 0))
-                ragdoll.nogap = true 
-                ragdoll.no_limb = true 
-                ragdoll.no_gibs = true 
-                for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			        local colide = ragdoll:GetPhysicsObjectNum( i )
-                    ParticleEffect("blood_impact_green_01",colide:GetPos(), ragdoll:GetAngles(), self)     
-		        end
-                EmitSound( "npc/antlion/antlion_shoot1.wav",ragdoll:GetPos() )
-            end)
-        end
-        gore_mod_ApplyCorpseEffects(ragdoll)
-
-        if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and GetConVar("can_npc_explode"):GetBool() then
-            gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+            end)     
         else
             if owner.LeftArmDestroid or owner.RightArmDestroid then
                 dmg_data.slice = true 
@@ -116,11 +125,14 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                 end
             end
             dmg_data.slice = false  
-            if dmg_data.dmg_force == nil then
+            if dmg_data.dmg_force == nil  then
                 return 
             end
-            local hit = gore_mod_GetClosestPhysBone(ragdoll,dmg_data)
-            local PhysicsBone = hit.PhysicsBone
+
+            local PhysicsBone = gore_mod_GetClosestPhysBone(ragdoll,dmg_data).PhysicsBone
+            if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
+                PhysicsBone = gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,dmg_data.dmg_pos) --get hit physbone
+            end
             local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
             local bone_name = ragdoll:GetBoneName( bone ) 	
             print(bone_name)

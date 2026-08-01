@@ -27,10 +27,13 @@ function gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,pos)
 	if !ragdoll.gib_bone then
 		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
 	end
+	if !ragdoll.goremod_bone_to_ignore then
+		ragdoll.goremod_bone_to_ignore = {} 
+	end
 	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
 		local bone = ragdoll:TranslatePhysBoneToBone(i)
 		
-		if bone and ragdoll.gib_bone[i] ~= i then 
+		if bone and ragdoll.gib_bone[i] ~= i or ragdoll.goremod_bone_to_ignore[bone] ~= bone then 
 			local phys = ragdoll:GetPhysicsObjectNum(i)
 			
 			if IsValid(phys) and pos then
@@ -91,9 +94,6 @@ function noob_gore_TransferBones( ragdoll1, ragdoll2 ) -- Transfers the bones of
 			local pos, ang = ragdoll1:GetBonePosition( ragdoll2:TranslatePhysBoneToBone( i ) )
 			if ( pos ) then bone:SetPos( pos,true ) end
 			if ( ang ) then bone:SetAngles( ang ) end
-			if bone2 ~= nil then
-				bone:AddVelocity(bone2:GetVelocity())	
-			end
 		end
 	end
 end
@@ -127,7 +127,7 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
     	ragdollGIB:Spawn()
-		print(ragdollGIB)
+
 		if GetConVar("Disable_ragdoll_colision"):GetBool() then
 			ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         end
@@ -148,7 +148,11 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 			net.WriteEntity(ragdollGIB)--the ragdoll limb
 		net.Broadcast()
 		end)
-
+		if dmg_data then
+			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
+			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
+			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
+		end
 		ragdollGIB.gib_bone = {}
 		if ragdoll.bonegap_for_limb then
 			ragdollGIB.bonegap_for_limb = ragdoll.bonegap_for_limb
@@ -189,6 +193,7 @@ function gore_mod_slice_gib(ragdoll,bone_name)
 	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
 
 	if !ragdoll.slice_gib then ragdoll.slice_gib = {} end
+	if !ragdoll.goremod_bone_to_ignore then ragdoll.goremod_bone_to_ignore = {} end
 	if ragdoll.slice_gib[bone_id] == bone_id then
 		return 
 	end
@@ -202,7 +207,9 @@ function gore_mod_slice_gib(ragdoll,bone_name)
 		local bone = ragdoll:TranslatePhysBoneToBone(i)
 		if ragdoll.slice_gib[bone] ~= bone then
 			ragdoll:RemoveInternalConstraint(i) --remove ragdoll Constraint
+			ragdoll.goremod_bone_to_ignore[bone] = bone
 			--gore_mod_ForcePhysBonePos2(ragdoll)
+
 			gore_mod_colideBone(ragdoll,i)
 		end
 	end
