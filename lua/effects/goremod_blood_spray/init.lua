@@ -1,14 +1,3 @@
--- Core ConVars (Server-side, replicated to clients)
-CreateConVar("nextgenblood4_blood_stream_reps_multiplier", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Multiplier for blood stream particle count (duration)")
-CreateConVar("nextgenblood4_blood_sound_volume", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blood sound volume")
-CreateConVar("nextgenblood4_squirt_sound_volume", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Squirt sound volume")
-
--- NEW ConVars for customization (Server-side, replicated to clients)
-CreateConVar("nextgenblood4_stream_size", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Size multiplier for blood streams (0.5 = half, 2 = double)")
-CreateConVar("nextgenblood4_stream_force", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Force multiplier for blood streams (supports decimals like 0.5, 1.5, 2.3)")
-CreateConVar("nextgenblood4_stream_spread", "5", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Spread/FOV angle for blood streams in degrees (0 = straight line, 15 = wide spray)")
-CreateConVar("nextgenblood4_stream_density", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Frequency of blood spurts (0.1 = very frequent, 5 = slow/rare)")
-
 -- These are kinda ugly, you probably want to change them:
 local particles = {
     "decals/trail",
@@ -130,14 +119,14 @@ function EFFECT:Init(data)
     local flags = data:GetFlags()
     
     -- Apply reps multiplier to particle count
-    local reps_multiplier = GetConVar("nextgenblood4_blood_stream_reps_multiplier"):GetFloat()
+    local reps_multiplier = GetConVar("goremod_blood_stream_reps_multiplier"):GetFloat()
     self.reps = math.floor(((flags == 1 and particle_reps_burst) or (flags == 0 and particle_reps_stream) or 0) * reps_multiplier)
 
     -- Get customizable values as LOCAL variables so they're captured in timer closure
-    local size_mult = GetConVar("nextgenblood4_stream_size"):GetFloat()
-    local force_mult = GetConVar("nextgenblood4_stream_force"):GetFloat()
-    local spread_angle = GetConVar("nextgenblood4_stream_spread"):GetFloat()
-    local density = GetConVar("nextgenblood4_stream_density"):GetFloat()
+    local size_mult = GetConVar("goremod_stream_size"):GetFloat()
+    local force_mult = GetConVar("goremod_stream_force"):GetFloat()
+    local spread_angle = GetConVar("goremod_stream_spread"):GetFloat()
+    local density = GetConVar("goremod_stream_density"):GetFloat()
     
     -- NEW: Get bone name for limb multiplier
     local boneName = ""
@@ -166,7 +155,7 @@ function EFFECT:Init(data)
     if not emitter then return end
 
     -- Play squirt sound
-    sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("nextgenblood4_squirt_sound_volume"):GetFloat())
+    sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("goremod_squirt_sound_volume"):GetFloat())
 
     -- Store self reference for timer callback
     local effect_self = self
@@ -179,7 +168,7 @@ function EFFECT:Init(data)
             return
         end
         -- Play squirt sound again
-        sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("nextgenblood4_squirt_sound_volume"):GetFloat())
+        sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("goremod_squirt_sound_volume"):GetFloat())
 
         ent.CurrentPos = ent:GetPos()
 
@@ -225,9 +214,9 @@ function EFFECT:Init(data)
             
             particle:SetCollide(true)
             particle:SetCollideCallback(function(_, pos, normal)
-                if math.random(1, impact_chance) == 1 and (effect_self.CurrentStrenght or min_strenght) > 0.2 then
+                if math.random(1, impact_chance) == 1 and (effect_self.CurrentStrenght or min_strenght) > 0.2 and GetConVar("goremod_blood_do_decal"):GetBool() == true then
                     -- Play blood drip sound
-                    sound.Play(table.Random(drip_sounds), pos, sound_level, math.Rand(95, 105), GetConVar("nextgenblood4_blood_sound_volume"):GetFloat())
+                    sound.Play(table.Random(drip_sounds), pos, sound_level, math.Rand(95, 105), GetConVar("goremod_blood_sound_volume"):GetFloat())
                     
                     -- Apply size multiplier to decal size (NO limb multiplier)
                     local decal_size = decal_scale * size_mult

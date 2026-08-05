@@ -137,7 +137,34 @@ function GoremodOpenConfirmMenu()
             gore_mod_Add_slider(content,"Gib limit","goremod_gib_limit",0,6700,true)
         elseif name == "Blood Option" then
             gore_mod_Add_CheckBox(content,"goremod_blood","goremod_blood")
-            gore_mod_Add_slider(content,"Blood sound volume","nextgenblood4_squirt_sound_volume",0,2)
+            gore_mod_Add_CheckBox(content,"goremod_blood_do_decal","goremod_blood_do_decal")
+            gore_mod_Add_slider(content,"Duration Multiplier","goremod_blood_stream_reps_multiplier",0.1,10 )
+            --gore_mod_Add_slider(content,"Squirt sound volume","goremod_squirt_sound_volume",0,2)
+            gore_mod_Add_slider(content,"Blood sound volume","goremod_blood_sound_volume",0,2)
+            gore_mod_Add_slider(content,"Blood Spurt Frequency","goremod_stream_density",0.1,5)
+            gore_mod_Add_slider(content,"Blood Force","goremod_stream_force",0.1,5)
+            gore_mod_Add_slider(content,"Blood Stream Size","goremod_stream_size",0.1,10 )
+            gore_mod_Add_slider(content,"Spread Angle (FOV)","goremod_stream_spread",0,100,true )
+
+
+            /*-- Blood Stream Size
+            local sizeSlider = panel:NumSlider("Blood Stream Size", "nextgenblood4_stream_size", 0.1, 10, 2)
+            
+
+            
+            
+            -- Blood Stream Duration (Reps)
+            local repsSlider = panel:NumSlider("Duration Multiplier", "nextgenblood4_blood_stream_reps_multiplier", 0.1, 10, 2)
+            
+
+
+            */
+
+
+
+
+
+
         elseif name == "About" then
             local text = vgui.Create("DLabel", content)
             text:SetText("My Config Menu\nVersion 1.0")

@@ -123,6 +123,10 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
     local PhysBone = ragdoll:TranslateBoneToPhysBone(bone_id)
 
+	if !ragdoll.gib_bone then
+		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+	end
+
 	local ragdollGIB = ents.Create("prop_ragdoll")
     if IsValid(ragdollGIB) and IsValid(ragdoll) and ragdoll.gib_bone[PhysBone] ~= PhysBone then
     	ragdollGIB:SetModel(ragdoll:GetModel())

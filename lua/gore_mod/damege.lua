@@ -21,8 +21,12 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
             if hit == nil then
 				return 
 			end
+
 			local bone = ragdoll:TranslatePhysBoneToBone(hit)
 			local bone_name = ragdoll:GetBoneName( bone ) 	
+            if bone_name == "__INVALIDBONE__" then
+				return 
+			end
             if GetConVar("goremod_debug"):GetBool() then
                 print(bone_name.."is hit")
             end
@@ -35,7 +39,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 end
 			end
 
-			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and doDamege == true then 
+			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and ragdoll.goremod_bone_to_ignore[bone] ~= bone and doDamege == true then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     if dmg_data.dmg_type == 1 and GetConVar("goremod_DMG_CRUSH_slice_ragdoll"):GetBool() == false then
                         dmg_data.slice = false     
@@ -47,7 +51,7 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                     ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), ragdoll)
                 end
                 if bone == 0 then
-                    if bone_name == "ValveBiped.Bip01_Pelvis" and not ragdoll.goremod_is_gibbed then
+                    if bone_name == "ValveBiped.Bip01_Pelvis" and not ragdoll.goremod_is_gibbed and not ragdoll.no_limb then
                         ragdoll.goremod_is_gibbed = true 
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data)
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_R_Thigh",dmg_data)

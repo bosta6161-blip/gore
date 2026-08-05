@@ -69,10 +69,11 @@ end )
 hook.Add( "noob_gore_make_limb_blood", "do limb_blood", function(ragdoll,bone_name)
     if GetConVar("goremod_blood"):GetBool() then
         timer.Simple(0, function()
-            local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
             if not ragdoll:IsValid() then
                 return 
             end
+            local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+
             if bone_id == 0 then
                 return 
             end
