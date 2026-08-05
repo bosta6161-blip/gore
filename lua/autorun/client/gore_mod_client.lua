@@ -2,15 +2,15 @@ net.Receive( "noob_gore_benemerge", function()
     local ent = net.ReadEntity()
     local main_bone = net.ReadInt( 8 ) -- use the same number of bits that were written.
 	local ragdoll_parent = net.ReadEntity()
-	if not ent:IsValid() then
+	if not ragdoll_parent:IsValid() then
 		return 
 	end
 
-    local ragdoll = ClientsideRagdoll( ent:GetModel() )		-- Create a ragdoll using the player's model
-	ragdoll:SetRagdollPos( ent:GetPos() )
+    local ragdoll = ClientsideRagdoll( ragdoll_parent:GetModel() )		-- Create a ragdoll using the player's model
+	ragdoll:SetRagdollPos( ragdoll_parent:GetPos() )
 	ragdoll:SetNoDraw( false )
 	ragdoll:DrawShadow( true )
-	ragdoll:SetSkin( ent:GetSkin() )
+	ragdoll:SetSkin( ragdoll_parent:GetSkin() )
 	ragdoll:SetParent(ragdoll_parent)
 	ragdoll:AddEffects(EF_BONEMERGE)
 	ragdoll:SetLOD(0)
@@ -18,8 +18,8 @@ net.Receive( "noob_gore_benemerge", function()
     ragdoll.slice_gib = {} 
 	ragdoll.main_bone = main_bone
 	ragdoll.slice_gib[main_bone] = main_bone
-	for i = 1, #ent:GetBodyGroups() do
-		ragdoll:SetBodygroup(i, ent:GetBodygroup(i))
+	for i = 1, #ragdoll_parent:GetBodyGroups() do
+		ragdoll:SetBodygroup(i, ragdoll_parent:GetBodygroup(i))
 	end
     sigma_children2(ragdoll,main_bone)
     local PhysBone = ragdoll:TranslateBoneToPhysBone(main_bone)
@@ -30,7 +30,7 @@ net.Receive( "noob_gore_benemerge", function()
 		end
 	end
 
-	ragdoll:SnatchModelInstance(ent)
+	--ragdoll:SnatchModelInstance(ent)
 	ragdoll:AddCallback("BuildBonePositions",GibCallback)
 end )
 

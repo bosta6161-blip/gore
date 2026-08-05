@@ -1,3 +1,19 @@
+sound.Add({
+    name = "goremod_gib_sound",
+    sound = {
+        "noob_dev2323/kf2_tear1.wav",
+        "noob_dev2323/kf2_tear2.wav",
+        "noob_dev2323/kf2_tear3.wav",
+        "noob_dev2323/kf2_tear4.wav",
+        "noob_dev2323/kf2_tear5.wav",
+        "noob_dev2323/kf2_tear6.wav",
+        "noob_dev2323/kf2_tear7.wav",
+    },
+    level = 90,
+    volume = 1,
+    pitch = { 95, 105 },
+    channel = CHAN_STATIC,
+})
 bone_name_togap = {
     ["ValveBiped.Bip01_Head1"] = {
         model = "models/noob_dev2323/gib/l4d/common_infected_w_neck.mdl",
@@ -9,8 +25,8 @@ bone_name_togap = {
     ["ValveBiped.Bip01_Spine2"] = {
         model = "models/noob_dev2323/gib/l4d/half_bottom.mdl",
         localAng = Angle(0, 90, 90),
-        offset = Vector(-2,2,0),
-        capScale = Vector(1.1, 1.1, 1.1) 
+        offset = Vector(1,1.7,0),
+        capScale = Vector(0.9,1.02,0.85) 
     },
     ["ValveBiped.Bip01_R_UpperArm"] = {
         bonemerge = true,
@@ -21,17 +37,12 @@ bone_name_togap = {
         model = "models/noob_dev2323/gib/common_infected_w_l_arm_shoulder.mdl",
     },
     ["ValveBiped.Bip01_R_Calf"] = {
-        model = "models/noob_dev2323/gib/l4d/leg.mdl",
-        localAng = Angle(-90,0,0),
-        offset = Vector(12.127,2.926,0.554),
-        capScale = Vector(1, 1, 1),
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/r_leg_gap.mdl"
     },
     ["ValveBiped.Bip01_L_Calf"] = {
-        model = "models/noob_dev2323/gib/l4d/leg.mdl",
-        localAng = Angle(-90,-12.281,0),
-        offset = Vector(14.854,2.772,-0.734),
-        capScale = Vector(0.919, 1, 1),
-        fem_offset = Vector(12.176,2.772,-0.734) 
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/l_leg_gap.mdl"
     },
     ["ValveBiped.Bip01_L_Foot"] = {
         model = "models/noob_dev2323/gib/l4d/gib.mdl",
@@ -47,11 +58,11 @@ bone_name_togap = {
     },
     ["ValveBiped.Bip01_L_Forearm"] = {
         bonemerge = true,
-        model = "models/noob_dev2323/gib/l4d/common_infected_w_arm.mdl",
+        model = "models/noob_dev2323/gib/l_arm67.mdl",
     },
     ["ValveBiped.Bip01_R_Forearm"] = {
         bonemerge = true,
-        model = "models/noob_dev2323/gib/r_arm.mdl",
+        model = "models/noob_dev2323/gib/r_arm67.mdl",
     }, 
     ["ValveBiped.Bip01_R_Hand"] = {
         model = "models/noob_dev2323/gib/l4d/gib.mdl",
@@ -66,16 +77,12 @@ bone_name_togap = {
         capScale = Vector(0.366,0.366,0.258),
     },
     ["ValveBiped.Bip01_L_Thigh"] = {
-        model = "models/noob_dev2323/gib/l4d/upper_leg_l.mdl",
-        localAng = Angle(-52.21,13.08,-103.5),
-        offset = Vector(3.4,-0.98,-1.01),
-        capScale = Vector(1, 1, 1),
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/l4d/upper_leg_l.mdl"
     },
     ["ValveBiped.Bip01_R_Thigh"] = {
-        model = "models/noob_dev2323/gib/l4d/upper_leg_l.mdl",
-        localAng = Angle(-133.26,13.4,14.42),
-        offset = Vector(3.01,-1.94,-2.88),
-        capScale = Vector(1, 1, 1),
+        bonemerge = true,
+        model = "models/noob_dev2323/gib/l4d/upper_legr.mdl"
     },
 }
 goremod_CustomGibs = {

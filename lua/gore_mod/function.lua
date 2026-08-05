@@ -4,6 +4,7 @@ util.AddNetworkString( "noob_gore_benemerge" )
 util.AddNetworkString( "noob_gore_aids" )
 gib_PhysBone_RAGDOLLS = {}
 limb_ragdoll_count = {}
+goremod_gib_count = {}
 gore_mod_slice_damege = {
 	1,
 	4,
@@ -80,10 +81,10 @@ function gore_mod_gib_PhysBone(ragdoll,bone_name,dmg_data)
         gore_mod_colideBone(ragdoll,PhysBone)
     end
     local children = ragdoll:GetChildBones(bone_id)
-    for k, v in pairs(children) do --no more shit code
-		local bone_children_name = ragdoll:GetBoneName( v )
+	for _, child in ipairs(children) do  --no more shit code
+		local bone_children_name = ragdoll:GetBoneName(child)
         gore_mod_gib_PhysBone(ragdoll,bone_children_name,dmg_data)
-    end
+	end
 end
 function noob_gore_TransferBones( ragdoll1, ragdoll2 ) -- Transfers the bones of one entity to a ragdoll's physics bones (modified version of some of RobotBoy655's code)
 	if !IsValid( ragdoll1 ) or !IsValid( ragdoll2 ) then return end
@@ -118,17 +119,18 @@ end
 
 function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     if ragdoll:LookupBone(bone_name) == nil or ragdoll:LookupBone(bone_name) == 0 then return end
-	if GetConVar("sliced_ragdoll_fade_time"):GetFloat() <= 0 then return end
+	if GetConVar("goremod_sliced_ragdoll_fade_time"):GetFloat() <= 0 then return end
     local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+    local PhysBone = ragdoll:TranslateBoneToPhysBone(bone_id)
 
 	local ragdollGIB = ents.Create("prop_ragdoll")
-    if IsValid(ragdollGIB) and IsValid(ragdoll) then
+    if IsValid(ragdollGIB) and IsValid(ragdoll) and ragdoll.gib_bone[PhysBone] ~= PhysBone then
     	ragdollGIB:SetModel(ragdoll:GetModel())
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
     	ragdollGIB:Spawn()
 
-		if GetConVar("Disable_ragdoll_colision"):GetBool() then
+		if GetConVar("goremod_Disable_ragdoll_colision"):GetBool() then
 			ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         end
 
@@ -141,6 +143,7 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		noob_gore_TransferBones( ragdoll, ragdollGIB )
 		ragdollGIB:SetNoDraw(true )
 		ragdollGIB:DrawShadow(false )
+		ragdollGIB.goremod_is_ragdoll_limb = true 
 		timer.Simple(0, function()
 		net.Start( "noob_gore_benemerge" )
 			net.WriteEntity(ragdoll) --the original ragdoll
@@ -176,8 +179,11 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		end
 		hook.Call( "noob_gore_gap_limb", nil,ragdollGIB,ragdollGIB:GetModel(),bone_name) --call this hook to make cap based on bone name
 		gore_mod_ApplyCorpseEffects(ragdollGIB) 
-		if GetConVar("sliced_ragdoll_fade_time"):GetFloat() < 998 then
-			timer.Simple(GetConVar("sliced_ragdoll_fade_time"):GetFloat(), function()
+		
+		
+		ParticleEffect("blood_advisor_puncture",ragdollGIB:GetBonePosition(ragdollGIB.main_bone_sigma), ragdoll:GetAngles(), self)  
+		if GetConVar("goremod_sliced_ragdoll_fade_time"):GetFloat() < 998 then
+			timer.Simple(GetConVar("goremod_sliced_ragdoll_fade_time"):GetFloat(), function()
 				if IsValid(ragdollGIB) then
 					ragdollGIB:Remove()
 				end
@@ -267,7 +273,7 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
 
-	if #limb_ragdoll_count > GetConVar("sliced_ragdoll_limit"):GetInt() then
+	if #limb_ragdoll_count > GetConVar("goremod_sliced_ragdoll_limit"):GetInt() then
 		if IsValid(limb_ragdoll_count[1]) then
             limb_ragdoll_count[1]:Remove()
         end
@@ -286,7 +292,7 @@ function gore_mod_ForcePhysBonePos2(ragdoll)
 		
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone) 
-			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,85),true)
+			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,70),true)
 		end
 	end
 end
@@ -327,7 +333,7 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 		local bone_name = ragdoll:GetBoneName(boneid)
 		local phys = ragdoll:GetPhysicsObjectNum(i)
 
-		ParticleEffect("blood_advisor_puncture",phys:GetPos(), ragdoll:GetAngles(), self)  
+		
 		
 		if force == nil then
 			force = Vector(math.Rand(-100, 100), math.Rand(-100, 100), math.Rand(150, 250))
@@ -338,17 +344,13 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
         }
 
 		if ragdoll:GetManipulateBoneScale(boneid) ~= Vector(0.000000,0.000000,0.000000) then
+			ParticleEffect("blood_advisor_puncture",phys:GetPos(), ragdoll:GetAngles(), self)  
 			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
 		end
 
 	end
-	if Particle then
-		local bloodeffect = EffectData()
-		bloodeffect:SetOrigin(ragdoll:GetPos() +ragdoll:OBBCenter())
-		bloodeffect:SetColor(100)
-		bloodeffect:SetScale(50)
-		util.Effect("goremod_blood_smoke",bloodeffect)
-	end
+	ragdoll:EmitSound( "noob_dev2323/kf2_totalgib.wav", 105, 100, 1, CHAN_AUTO ) -- Same as below
+
 
 	ragdoll:Remove()
 end
@@ -380,26 +382,33 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-	if !ragdoll.bonegap_for_limb then
-		ragdoll.bonegap_for_limb = {}
-	end
-	ragdoll.bonegap_for_limb[bone_id] = bone_id
-	if dmg_data.slice == true and not ragdoll.no_limb then
-		gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
-	else
-		ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
-	end
-	gore_mod_gib_PhysBone(ragdoll,bone_name,dmg_data)
 
-	hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
+
+
+
+		if !ragdoll.bonegap_for_limb then
+			ragdoll.bonegap_for_limb = {}
+		end
+		ragdoll.bonegap_for_limb[bone_id] = bone_id
+		if dmg_data.slice == true and not ragdoll.no_limb and not dmg_data.nogibs == true then
+			gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
+		else
+			ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
+		end
+		gore_mod_gib_PhysBone(ragdoll,bone_name,dmg_data)
+
+		hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
+		hook.Call( "noob_gore_make_gore_sound", nil,ragdoll,bone_name) --call this hook to make sound on bone name
+		hook.Call( "noob_gore_make_limb_blood", nil,ragdoll,bone_name) --call this hook to make blood on bone name
+
 end
 
 function gore_mod_ApplyCorpseEffects(ragdoll)
     if ragdoll.destructible_Corpse then
         return 
     end
-    local root_health_mult = GetConVar("root_bone_health_multiplier"):GetFloat()
-    local health_mult = GetConVar("limb_health_multiplier"):GetFloat()
+    local root_health_mult = GetConVar("goremod_limb_health_multiplier"):GetFloat()
+    local health_mult = GetConVar("goremod_root_bone_health_multiplier"):GetFloat()
 
 	ragdoll.destructible_Corpse = true
     ragdoll.gore_mod_boneHealth = {}

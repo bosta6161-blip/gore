@@ -244,6 +244,8 @@ function EFFECT:UpdateExtraForce()
 end
 
 function EFFECT:Think()
+	if not self.timername then return false end
+
     if timer.Exists(self.timername) then
         local lifetime = CurTime() - self.StartTime
         local dietime = self.reps * (1 / particle_fps)

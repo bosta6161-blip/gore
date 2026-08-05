@@ -1,6 +1,21 @@
 gore_mod_npc_live_table = {}
+
+function goremod_DoBleed(ent,bone,attacker)
+    timer.Create("MyTimer_" .. ent:EntIndex(),0.1,200, function()
+        if ent:IsValid()then
+            local dmg = DamageInfo() -- Create a server-side damage information class
+            dmg:SetDamage(ent:Health()/50+0.05)
+            dmg:SetAttacker(attacker)
+
+            dmg:SetDamageType(DMG_NEVERGIB)
+            ent:TakeDamageInfo( dmg )
+
+        end
+    end)
+end
+
 hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
-    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() and not npc.IsLambdaPlayer then
+    if GetConVar("goremod_enable"):GetBool() and GetConVar("goremod_live_dismenber_EXPEREMENTAL"):GetBool() and not npc.IsLambdaPlayer then
         if npc:LookupBone("ValveBiped.Bip01_Spine") == nil then return end
         if not npc.LeftArmHealth then
             npc.RightArmHealth = npc:GetMaxHealth()/1.6
@@ -23,9 +38,11 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
                 npc.RightArmDestroid = true
                 npc:DropWeapon()
                 npc:SetEnemy(NULL)
-
+                goremod_DoBleed(npc,npc:LookupBone("ValveBiped.Bip01_R_Forearm"),dmginfo:GetAttacker())
                 hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_R_Forearm") --call this hook to make cap based on bone name
                 destroy_npc_limb(npc,"ValveBiped.Bip01_R_Forearm",dmg_data)
+                hook.Call( "noob_gore_make_gore_sound", nil,npc,"ValveBiped.Bip01_R_Forearm")
+                	hook.Call( "noob_gore_make_limb_blood", nil,npc,"ValveBiped.Bip01_R_Forearm") --call this hook to make blood on bone name
             end
         end
         if hitgroup == HITGROUP_LEFTARM and not npc.LeftArmDestroid then
@@ -35,8 +52,11 @@ hook.Add("ScaleNPCDamage","ArmGib",function(npc,hitgroup,dmginfo)
                 npc:SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR )
                 npc:SetEnemy(NULL)
                 npc:SetSchedule(SCHED_RUN_FROM_ENEMY)
-                hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") --call this hook to make cap based on bone name
+                goremod_DoBleed(npc,npc:LookupBone("ValveBiped.Bip01_L_Forearm"),dmginfo:GetAttacker())
+                hook.Call( "noob_gore_gap", nil,npc,npc:GetModel(),"ValveBiped.Bip01_L_Forearm") 
+                hook.Call( "noob_gore_make_gore_sound", nil,npc,"ValveBiped.Bip01_L_Forearm") 
                 destroy_npc_limb(npc,"ValveBiped.Bip01_L_Forearm",dmg_data)
+                hook.Call( "noob_gore_make_limb_blood", nil,npc,"ValveBiped.Bip01_L_Forearm") --call this hook to make blood on bone name
             end
         end
     end
@@ -44,7 +64,7 @@ end)
 
 
 hook.Add("Think","ArmCripple_AI",function()
-    if GetConVar("gore_enable"):GetBool() and GetConVar("live_dismenber_EXPEREMENTAL"):GetBool() then
+    if GetConVar("goremod_enable"):GetBool() and GetConVar("goremod_live_dismenber_EXPEREMENTAL"):GetBool() then
         for _,npc in ipairs( gore_mod_npc_live_table ) do
             if not npc:IsValid() then
                 table.RemoveByValue(gore_mod_npc_live_table, npc) --remove ragdoll on the table

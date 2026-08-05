@@ -1,5 +1,5 @@
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
-    if GetConVar("ragdoll_has_gap_models"):GetBool() then
+    if GetConVar("goremod_ragdoll_has_gap_models"):GetBool() then
         if !ragdoll.aids then ragdoll.aids = {} end
 
         local model = ragdoll:GetModel()
@@ -14,7 +14,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
             local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
 
             local gib_data = bone_name_togap[bone_name]
-            if gib_data.bonemerge then 
+            if gib_data.bonemerge == true then 
                 gore_mod_bonemerge_prop(ragdoll,gib_data.model)
             else
                 offset = gib_data.offset
@@ -28,7 +28,7 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
                     end
                 end
 
-
+ 
                 if not IsValid(gap) then return end
                 gap:SetModel(gib_data.model)               
                 gap:Spawn()
@@ -60,9 +60,62 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     end
 end )
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
-    if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
-        gore_mod_bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
+    if GetConVar("goremod_ragdoll_has_gap_models"):GetBool() then
+        if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
+            gore_mod_bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
+        end
     end
+end )
+hook.Add( "noob_gore_make_limb_blood", "do limb_blood", function(ragdoll,bone_name)
+    if GetConVar("goremod_blood"):GetBool() then
+        timer.Simple(0, function()
+            local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+            if not ragdoll:IsValid() then
+                return 
+            end
+            if bone_id == 0 then
+                return 
+            end
+            if ragdoll.goremod_is_ragdoll_limb then
+                return 
+            end
+            local bone_parent = ragdoll:GetBoneParent(bone_id)
+            local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_id)
+            
+
+            if bone_parent == 0 then
+                bone_parent = bone_id
+            end
+            local aids,bone_rotation67 = ragdoll:GetBonePosition(bone_parent)
+            
+
+            local lpos, lang = WorldToLocal(bonepos,bone_rotation67, ragdoll:GetBonePosition(bone_parent))
+
+            local meme = ents.Create("prop_dynamic")
+            if not IsValid(meme) then return end 
+            
+            meme:SetModel("models/props_junk/GlassBottle01a.mdl")               
+            meme:Spawn()
+            meme:SetModelScale(0)
+            meme:SetNotSolid(true)
+            meme:DrawShadow(false)
+        
+            SafeRemoveEntityDelayed(meme, 15)
+        
+            meme:FollowBone(ragdoll, bone_parent)
+        
+            meme:SetLocalAngles(lang + Angle(180,0,0))
+            meme:SetLocalPos(lpos + lang:Forward()*-8)
+            
+            local effectdata = EffectData()
+            effectdata:SetEntity(meme)
+            effectdata:SetFlags(0)
+            util.Effect("goremod_blood_spray", effectdata)
+        end)
+    end
+end )
+hook.Add( "noob_gore_make_gore_sound", "do gib gap limb", function(ragdoll,bone_name)
+    ragdoll:EmitSound("goremod_gib_sound")
 end )
 hook.Add( "noob_gore_on_gib_destroid", "on gib destroid", function(ragdoll,bone_name,dmg_data)
     if ragdoll.no_gibs then return end

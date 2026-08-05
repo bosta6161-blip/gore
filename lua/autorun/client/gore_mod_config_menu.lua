@@ -42,22 +42,14 @@ local function gore_mod_Add_label(parent,text,tiny)
 
     label:SizeToContents()
 end
-local function gore_mod_Add_slider(parent,text,convas_name,fade_time,notdecimal)
+local function gore_mod_Add_slider(parent,text,convas_name,min,max,notdecimal)
     local slider = vgui.Create("DNumSlider", parent)
     slider:Dock(TOP)
     slider:DockMargin(20,5,20,0)
     slider:SetText("")
-    if fade_time then
-        slider:SetDecimals(0)
-        slider:SetMin(0)
-        slider:SetMax(999)
-    else
-        slider:SetMin(-10)
-        slider:SetMax(10)
-    end
+    slider:SetMin(min)
+    slider:SetMax(max)
     if notdecimal then
-        slider:SetMin(5)
-        slider:SetMax(50)
         slider:SetDecimals(0)
     else
         slider:SetDecimals(1)
@@ -102,45 +94,50 @@ function GoremodOpenConfirmMenu()
         content:Clear()
         gore_mod_Add_label(content,name)
         if name == "General" then
-            gore_mod_Add_CheckBox(content,"gore is enable!","gore_enable")
+            gore_mod_Add_CheckBox(content,"gore is enable!","goremod_enable")
             gore_mod_Add_label(content,"Disable Noob gore mod.",true)
-            gore_mod_Add_CheckBox(content,"can gib only npc corpse!","can_gib_only_npc_corpse")
+            gore_mod_Add_CheckBox(content,"Gib ragdoll!","goremod_can_gib_only_npc_corpse")
             gore_mod_Add_label(content,"Disable gore to only ragdolls spawned by NPCs/nextbots/players.",true)
-            gore_mod_Add_CheckBox(content,"can destroy bodies","can_gib_ragdoll")
+            gore_mod_Add_CheckBox(content,"can destroy bodies","goremod_can_gib_ragdoll")
             gore_mod_Add_label(content,"After you kill the NPC, you can't destroy the body, this can help with performance when there's a lot going on.",true)
-            gore_mod_Add_CheckBox(content,"can NPC explode","can_npc_explode")
-            gore_mod_Add_label(content,"Disable NPC explode when die",true)
-            gore_mod_Add_CheckBox(content,"cannibalism","cannibalism")
+            gore_mod_Add_CheckBox(content,"can NPC explode","goremod_can_npc_explode")
+            gore_mod_Add_label(content,"Disable NPC explode when die from explosion",true)
+            gore_mod_Add_CheckBox(content,"cannibalism","goremod_cannibalism")
             gore_mod_Add_label(content,"Eat gibs to restore life",true)
-            gore_mod_Add_CheckBox(content,"ragdoll has gore models","ragdoll_has_gap_models")
+            gore_mod_Add_CheckBox(content,"ragdoll has gore models","goremod_ragdoll_has_gap_models")
         elseif name == "experimental" then
-            gore_mod_Add_CheckBox(content,"dismember living NPC","live_dismenber_EXPEREMENTAL")
+            gore_mod_Add_CheckBox(content,"dismember living NPC","goremod_live_dismenber_EXPEREMENTAL")
             gore_mod_Add_label(content,"NPC can lose limbs in combat.",true)
-            gore_mod_Add_CheckBox(content,"burned corpse effect","burned_corpse_effect_EXPEREMENTAL")
+            gore_mod_Add_CheckBox(content,"burned corpse effect","goremod_burned_corpse_effect_EXPEREMENTAL")
             gore_mod_Add_label(content,"Replace the NPC model when it dies from a burn.",true)
-            gore_mod_Add_CheckBox(content,"dissolve efect","dissolve_efect_EXPEREMENTAL")
+            gore_mod_Add_CheckBox(content,"dissolve efect","goremod_dissolve_efect_EXPEREMENTAL")
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to dust.",true)
-            gore_mod_Add_CheckBox(content,"Acid efect","acid_efect_EXPEREMENTAL")
+            gore_mod_Add_CheckBox(content,"Acid efect","goremod_acid_efect_EXPEREMENTAL")
             gore_mod_Add_label(content,"When the NPC dissolves, it turns to skeleton.",true)
-            gore_mod_Add_CheckBox(content,"sawblade slice","sawblade_slice_EXPEREMENTAL")
+            gore_mod_Add_CheckBox(content,"sawblade slice","goremod_sawblade_slice_EXPEREMENTAL")
             gore_mod_Add_label(content,"just like zombies.",true)
         elseif name == "Ragdoll Option" then
-            gore_mod_Add_slider(content,"limb health multiplier","limb_health_multiplier")
-            gore_mod_Add_label(content,"multiplies the health of the members.",true )
-            gore_mod_Add_slider(content,"root bone health multiplier","root_bone_health_multiplier")
-            gore_mod_Add_label(content,"Gib Option" )
-            gore_mod_Add_slider(content,"gib fade time","gib_fade_time",true )
-            gore_mod_Add_label(content,"gib fade time.",true )
-            gore_mod_Add_slider(content,"Ragdoll limb fade time","sliced_ragdoll_fade_time",true )
-            gore_mod_Add_label(content,"Ragdoll limb fade time",true )
-            gore_mod_Add_slider(content,"limb limit","sliced_ragdoll_limit",true,true )
-            gore_mod_Add_label(content,"Ragdoll limb can be espensive",true )
-            gore_mod_Add_label(content,"Set value to max to make gib never fade" )
+            gore_mod_Add_slider(content,"limb health multiplier","goremod_limb_health_multiplier",-10,10)
+            gore_mod_Add_label(content,"multiplies the health of the members.",true)
+            gore_mod_Add_slider(content,"root bone health multiplier","goremod_root_bone_health_multiplier",-10,10)
             
-            gore_mod_Add_CheckBox(content,"Crush damege slice ragdoll","DMG_CRUSH_slice_ragdoll")
+            gore_mod_Add_CheckBox(content,"Crush damege slice ragdoll","goremod_DMG_CRUSH_slice_ragdoll")
             gore_mod_Add_label(content,"Disable ragdoll sliced when is crush",true)
-            gore_mod_Add_CheckBox(content,"Disable ragdoll colision","Disable_ragdoll_colision")
+            gore_mod_Add_CheckBox(content,"Disable ragdoll colision","goremod_Disable_ragdoll_colision")
             gore_mod_Add_label(content,"Remove corpse colision",true)
+        elseif name == "Gib Option" then
+            gore_mod_Add_label(content,"Set value to max to make gib never fade" )
+            gore_mod_Add_slider(content,"gib fade time","goremod_gib_fade_time",0,999)
+            gore_mod_Add_label(content,"gib fade time.",true )
+            gore_mod_Add_slider(content,"Ragdoll limb fade time","goremod_sliced_ragdoll_fade_time",0,999 )
+            gore_mod_Add_label(content,"Ragdoll limb fade time",true )
+
+            gore_mod_Add_slider(content,"limb limit","goremod_sliced_ragdoll_limit",0,50,true)
+            gore_mod_Add_label(content,"Ragdoll limb can be espensive",true )
+            gore_mod_Add_slider(content,"Gib limit","goremod_gib_limit",0,6700,true)
+        elseif name == "Blood Option" then
+            gore_mod_Add_CheckBox(content,"goremod_blood","goremod_blood")
+            gore_mod_Add_slider(content,"Blood sound volume","nextgenblood4_squirt_sound_volume",0,2)
         elseif name == "About" then
             local text = vgui.Create("DLabel", content)
             text:SetText("My Config Menu\nVersion 1.0")
@@ -170,6 +167,8 @@ function GoremodOpenConfirmMenu()
     local pages = {
         "General",
         "Ragdoll Option",
+        "Gib Option",
+        "Blood Option",
         "experimental",
         "About"
     }

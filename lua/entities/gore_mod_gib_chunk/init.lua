@@ -15,10 +15,12 @@ function ENT:Initialize()
 	self.gib_Health = 40
 	self.damage_Start_delay = CurTime() + 1
 	self.fucked = false  
+
+    table.insert(goremod_gib_count, self)
 end
 function ENT:Use(ply) 
 	local Position = ply:GetEyeTrace()
-	if GetConVar("cannibalism"):GetBool() then
+	if GetConVar("goremod_cannibalism"):GetBool() then
 		local health = ply:Health()
 		ply:SetHealth( health + 5 )
 		local bloodspray = EffectData()
@@ -32,8 +34,14 @@ function ENT:Use(ply)
 	end
 end
 function ENT:Think()
-	if GetConVar("sliced_ragdoll_fade_time"):GetFloat() < 998 then
-		timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
+	if #goremod_gib_count > GetConVar("goremod_gib_limit"):GetInt() then
+        if IsValid(goremod_gib_count[1]) then
+            goremod_gib_count[1]:Remove()
+        end
+        table.remove(goremod_gib_count, 1)
+    end
+	if GetConVar("goremod_gib_fade_time"):GetFloat() < 998 then
+		timer.Simple(GetConVar("goremod_gib_fade_time"):GetFloat(), function()
 			if IsValid(self) then
 				self:Remove()
 			end
