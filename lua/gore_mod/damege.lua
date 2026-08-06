@@ -53,10 +53,10 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 if bone == 0 then
                     if bone_name == "ValveBiped.Bip01_Pelvis" and not ragdoll.goremod_is_gibbed and not ragdoll.no_limb then
                         ragdoll.goremod_is_gibbed = true 
+                        hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,"ValveBiped.Bip01_Pelvis",dmg_data) --call this hook to make gibs based on bone name
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data)
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_R_Thigh",dmg_data)
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_L_Thigh",dmg_data)
-                        hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,"ValveBiped.Bip01_Pelvis",dmg_data) --call this hook to make gibs based on bone name
                         ragdoll:EmitSound( "noob_dev2323/kf2_totalgib.wav", 105, 100, 1, CHAN_AUTO ) -- Same as below
                         ragdoll:Remove()
                     else

@@ -1,58 +1,17 @@
 include( "gore_mod/ConVar.lua" )
 
-
-hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib script
-    if npc:IsNPC() then
-        npc.dmg_pos = dmginfo:GetDamagePosition()
-        npc.dmg_type = dmginfo:GetDamageType()
-        npc.dmg_force = dmginfo:GetDamageForce()
-        npc.dmg_dir = dmginfo:GetDamageForce():Angle()
-        npc.dmg_total_damege = dmginfo:GetDamage()
-        if GetConVar("goremod_dissolve_efect_EXPEREMENTAL"):GetBool() then
-            if dmginfo:IsDamageType(DMG_DISSOLVE) then
-                npc.isdissolverd = true 
-            else
-                npc.isdissolverd = false  
-            end
-        end
-        if GetConVar("goremod_acid_efect_EXPEREMENTAL"):GetBool() then
-            if dmginfo:IsDamageType(DMG_ACID) then
-                npc.is_melt = true 
-            end
-        end
-        if GetConVar("goremod_sawblade_slice_EXPEREMENTAL"):GetBool() and dmginfo:IsDamageType(DMG_CRUSH) and dmginfo:IsDamageType(DMG_SLASH) then
-            npc.goremod_is_slice_inhalf = true 
-        else
-            npc.goremod_is_slice_inhalf = false  
-        end
-    end
-end)
-hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
-    if owner.is_madness_combat_npc == true then return end
-    if GetConVar("goremod_enable"):GetBool() then
-        ragdoll:SetCollisionGroup(COLLISION_GROUP_WEAPON)
-        local dmg_data = {
-            dmg_type = owner.dmg_type,
-            dmg_pos = owner.dmg_pos,
-            dmg_force = owner.dmg_force,
-            dmg_dir = owner.dmg_dir,
-            dmg_total_damege = owner.dmg_total_damege,
-            slice = false 
-        }
-        
-        gore_mod_ApplyCorpseEffects(ragdoll)
-
-        if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and GetConVar("goremod_can_npc_explode"):GetBool() then
-            gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
-        elseif owner.goremod_is_slice_inhalf and owner:LookupBone("ValveBiped.Bip01_Spine2") ~= nil and GetConVar("goremod_sawblade_slice_EXPEREMENTAL"):GetBool()then
-            dmg_data.slice = true 
-            dmg_data.dmg_force = Vector(0,0,16000)
-            ragdoll:EmitSound( "ambient/machines/slicer" .. math.random(1,4) .. ".wav", 120, 100, 1, CHAN_AUTO ) -- Same as below
-            gore_mod_dismember_limb(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data) 
-        elseif owner.is_melt and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil then
-            timer.Simple(1, function()
-                if not IsValid(ragdoll) then return end
-                ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
+function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
+    if GetConVar("goremod_can_npc_explode"):GetBool() and dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and dmg_data.is_player ~= true then
+        gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+    elseif owner.goremod_is_slice_inhalf and owner:LookupBone("ValveBiped.Bip01_Spine2") ~= nil and GetConVar("goremod_sawblade_slice_EXPEREMENTAL"):GetBool()then
+        dmg_data.slice = true 
+        dmg_data.dmg_force = Vector(0,0,16000)
+        ragdoll:EmitSound( "ambient/machines/slicer" .. math.random(1,4) .. ".wav", 120, 100, 1, CHAN_AUTO ) -- Same as below
+        gore_mod_dismember_limb(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data) 
+    elseif dmg_data.dmg_type == 1048576 and owner:LookupBone("ValveBiped.Bip01_Spine") ~= nil and GetConVar("goremod_acid_efect_EXPEREMENTAL"):GetBool() then
+        timer.Simple(1, function()
+            if not IsValid(ragdoll) then return end
+            ragdoll:SetRenderMode(RENDERMODE_TRANSCOLOR)
                 gore_mod_bonemerge_prop(ragdoll,"models/player/skeleton.mdl")
                 ragdoll:SetColor(Color(255, 255, 255, 0))
                 ragdoll.nogap = true 
@@ -145,6 +104,46 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
                 gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
             end
         end
+end
+hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib script
+    if npc:IsNPC() then
+        npc.dmg_pos = dmginfo:GetDamagePosition()
+        npc.dmg_type = dmginfo:GetDamageType()
+        npc.dmg_force = dmginfo:GetDamageForce()
+        npc.dmg_dir = dmginfo:GetDamageForce():Angle()
+        npc.dmg_total_damege = dmginfo:GetDamage()
+        if GetConVar("goremod_dissolve_efect_EXPEREMENTAL"):GetBool() then
+            if dmginfo:IsDamageType(DMG_DISSOLVE) then
+                npc.isdissolverd = true 
+            else
+                npc.isdissolverd = false  
+            end
+        end
+
+        if GetConVar("goremod_sawblade_slice_EXPEREMENTAL"):GetBool() and dmginfo:IsDamageType(DMG_CRUSH) and dmginfo:IsDamageType(DMG_SLASH) then
+            npc.goremod_is_slice_inhalf = true 
+        else
+            npc.goremod_is_slice_inhalf = false  
+        end
+    end
+end)
+hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
+    if owner.is_madness_combat_npc == true then return end
+    if GetConVar("goremod_enable"):GetBool() then
+        ragdoll:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+        local dmg_data = {
+            dmg_type = owner.dmg_type,
+            dmg_pos = owner.dmg_pos,
+            dmg_force = owner.dmg_force,
+            dmg_dir = owner.dmg_dir,
+            dmg_total_damege = owner.dmg_total_damege,
+            slice = false 
+        }
+
+        gore_mod_ApplyCorpseEffects(ragdoll)
+        goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
+
+
     end
 end)
 
@@ -165,3 +164,4 @@ include( "gore_mod/damege.lua" )
 include( "gore_mod/giblist.lua" )
 include( "gore_mod/hook.lua" )
 include( "gore_mod/livedismenber.lua" )
+include( "gore_mod/player_gore.lua" )

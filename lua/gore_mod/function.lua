@@ -185,7 +185,7 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		gore_mod_ApplyCorpseEffects(ragdollGIB) 
 		
 		
-		ParticleEffect("blood_advisor_puncture",ragdollGIB:GetBonePosition(ragdollGIB.main_bone_sigma), ragdoll:GetAngles(), self)  
+		--ParticleEffect("blood_advisor_puncture",ragdollGIB:GetBonePosition(ragdollGIB.main_bone_sigma), ragdoll:GetAngles(), self)  
 		if GetConVar("goremod_sliced_ragdoll_fade_time"):GetFloat() < 998 then
 			timer.Simple(GetConVar("goremod_sliced_ragdoll_fade_time"):GetFloat(), function()
 				if IsValid(ragdollGIB) then
@@ -320,7 +320,7 @@ function goremod_make_dust(ragdoll)
         gib:Spawn()
 		
 
-        timer.Simple(GetConVar("gib_fade_time"):GetFloat(), function()
+        timer.Simple(GetConVar("goremod_gib_fade_time"):GetFloat(), function()
 			if IsValid(gib) then
 				gib:Remove()
 			end
@@ -331,7 +331,10 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 	if !ragdoll.gib_bone then
 		ragdoll.gib_bone = {}
 	end
-	
+	if ragdoll.goremod_is_gibbed then
+		return 
+	end
+	ragdoll.goremod_is_gibbed = true 
 	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
 		local boneid = ragdoll:TranslatePhysBoneToBone(i)
 		local bone_name = ragdoll:GetBoneName(boneid)
@@ -356,7 +359,7 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 	ragdoll:EmitSound( "noob_dev2323/kf2_totalgib.wav", 105, 100, 1, CHAN_AUTO ) -- Same as below
 
 
-	ragdoll:Remove()
+	SafeRemoveEntity(ragdoll)
 end
 
 function gore_mod_bonemerge_prop(ragdoll,model)
