@@ -96,7 +96,7 @@ function GoremodOpenConfirmMenu()
         if name == "General" then
             gore_mod_Add_CheckBox(content,"gore is enable!","goremod_enable")
             gore_mod_Add_label(content,"Disable Noob gore mod.",true)
-            gore_mod_Add_CheckBox(content,"Gib ragdoll!","goremod_can_gib_only_npc_corpse")
+            gore_mod_Add_CheckBox(content,"Can destroy map ragdoll!","goremod_can_gib_only_npc_corpse")
             gore_mod_Add_label(content,"Disable gore to only ragdolls spawned by NPCs/nextbots/players.",true)
             gore_mod_Add_CheckBox(content,"can destroy bodies","goremod_can_gib_ragdoll")
             gore_mod_Add_label(content,"After you kill the NPC, you can't destroy the body, this can help with performance when there's a lot going on.",true)
@@ -191,14 +191,50 @@ function GoremodOpenConfirmMenu()
 
             reset.DoClick = function()
 
-                RunConsoleCommand("myaddon_enabled", "1")
-                RunConsoleCommand("myaddon_brightness", "50")
+                RunConsoleCommand("goremod_enable", "1")
+                RunConsoleCommand("goremod_can_gib_only_npc_corpse", "1")
+                RunConsoleCommand("goremod_can_gib_ragdoll", "1")
+                RunConsoleCommand("goremod_can_npc_explode", "1")
+
+                RunConsoleCommand("goremod_limb_health_multiplier", "1")
+                RunConsoleCommand("goremod_root_bone_health_multiplier", "1")
+
+                RunConsoleCommand("goremod_DMG_CRUSH_slice_ragdoll", "1")
+                RunConsoleCommand("goremod_Disable_ragdoll_colision", "1")
+                RunConsoleCommand("goremod_gib_fade_time", "67") 
+                RunConsoleCommand("goremod_sliced_ragdoll_fade_time", "30")
+                RunConsoleCommand("goremod_ragdoll_has_gap_models", "1") 
+                RunConsoleCommand("goremod_sliced_ragdoll_limit", "25")
+                RunConsoleCommand("goremod_gib_limit", "500")
+
+                RunConsoleCommand("goremod_blood", "1")
+
+                RunConsoleCommand("goremod_cannibalism", "1")
+                RunConsoleCommand("goremod_debug", "0")
+                RunConsoleCommand("goremod_live_dismenber_EXPEREMENTAL", "0")
+                RunConsoleCommand("goremod_burned_corpse_effect_EXPEREMENTAL", "0")
+                RunConsoleCommand("goremod_dissolve_efect_EXPEREMENTAL", "0")
+                RunConsoleCommand("goremod_acid_efect_EXPEREMENTAL", "0")
+                RunConsoleCommand("goremod_sawblade_slice_EXPEREMENTAL", "0")
+                RunConsoleCommand("goremod_rd_bridge_enable", "0")
+
+                -- Core ConVars (Server-side, replicated to clients)
+                RunConsoleCommand("goremod_blood_stream_reps_multiplier", "1")
+                RunConsoleCommand("goremod_blood_sound_volume", "1")
+                RunConsoleCommand("goremod_squirt_sound_volume", "1")
+                RunConsoleCommand("goremod_blood_do_decal", "1")
+
+                -- NEW ConVars for customization (Server-side, replicated to clients)
+                RunConsoleCommand("goremod_stream_size", "1")
+                RunConsoleCommand("goremod_stream_force", "1")
+                RunConsoleCommand("goremod_stream_spread", "5")
+                RunConsoleCommand("goremod_stream_density", "1")
+
 
                 notification.AddLegacy("Configuration Reset!", NOTIFY_GENERIC, 3)
                 surface.PlaySound("garrysmod/save_load"..math.random(1,3)..".wav")
                 --surface.PlaySound("buttons/button15.wav")
             end
-
         end
     end
 
