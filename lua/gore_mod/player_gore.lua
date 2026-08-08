@@ -4,7 +4,7 @@
 
     -- Cache last damage info for each player
     hook.Add("EntityTakeDamage", "GoreMod_CachePlayerDamage", function(target, dmginfo)
-        if target:IsPlayer() then
+        if target:IsPlayer() and GetConVar("goremod_enable"):GetBool() then
             player_death_info[target] = {
                 dmgtype = dmginfo:GetDamageType(),
                 hitgroup = target:LastHitGroup(),
@@ -23,7 +23,7 @@
     end
 
     hook.Add("CreateEntityRagdoll", "GoreMod_ApplyToPlayerRagdoll", function(owner, ragdoll)
-        if not GetConVar("goremod_rd_bridge_enable"):GetBool() then
+        if not GetConVar("goremod_rd_bridge_enable"):GetBool() and GetConVar("goremod_enable"):GetBool() then
             return
         end
         if not IsPlayerRagdoll(owner, ragdoll) then

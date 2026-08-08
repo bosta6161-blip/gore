@@ -1,6 +1,6 @@
 VertexLitGeneric
 {
-$basetexture "Models\noob_dev2323\gibs\l4d\master_wound_cmap"
+$basetexture "Models\noob_dev2323\gibs\l4d\master_wound_cmap_yellow"
 $bumpmap "Models\noob_dev2323\gibs\l4d\master_wound_normal"
 
 

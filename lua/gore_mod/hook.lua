@@ -1,3 +1,14 @@
+local function gore_mod_sigma_children_gib(ragdoll,bone_name)
+    local sigma = ragdoll:GetChildBones(ragdoll:LookupBone(bone_name))
+    for k, v in pairs(sigma) do --no more shit code
+        for _,child in ipairs( ragdoll:GetChildren() ) do
+            if child.bonename_parent == ragdoll:GetBoneName(v) then
+                child:Remove()
+            end
+        end
+        gore_mod_sigma_children_gib(ragdoll,ragdoll:GetBoneName(v))
+    end
+end
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     if GetConVar("goremod_ragdoll_has_gap_models"):GetBool() then
         if !ragdoll.aids then ragdoll.aids = {} end
@@ -15,7 +26,8 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
 
             local gib_data = bone_name_togap[bone_name]
             if gib_data.bonemerge == true then 
-                gore_mod_bonemerge_prop(ragdoll,gib_data.model)
+                gore_mod_bonemerge_prop(ragdoll,gib_data.model,bone_name)
+                gore_mod_sigma_children_gib(ragdoll,bone_name)
             else
                 offset = gib_data.offset
                 local gap = ents.Create("prop_dynamic")
@@ -42,18 +54,9 @@ hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
                 gap:SetLocalPos(lpos + offset)
                 gap.bonename_parent = bone_name
                 gap.is_gap = true 
-                local function gore_mod_sigma_children_gib(ragdoll,bone_name)
-                    local sigma = ragdoll:GetChildBones(ragdoll:LookupBone(bone_name))
-                    for k, v in pairs(sigma) do --no more shit code
-                        for _,child in ipairs( ragdoll:GetChildren() ) do
-                            if child.bonename_parent == ragdoll:GetBoneName(v) then
-                                child:Remove()
-                            end
-                        end
-                        gore_mod_sigma_children_gib(ragdoll,ragdoll:GetBoneName(v))
-                    end
+                if ragdoll.goremod_bloodColor_is_YELLOW then
+                    gap:SetColor( Color( 255, 255, 0, 255 ))--add ugly piss efect
                 end
-
                 gore_mod_sigma_children_gib(ragdoll,bone_name)
             end
         end
@@ -62,7 +65,7 @@ end )
 hook.Add( "noob_gore_gap_limb", "do gib gap limb", function(ragdoll,model,bone_name)
     if GetConVar("goremod_ragdoll_has_gap_models"):GetBool() then
         if not goremod_model_gap_blacklist[model] and bone_name_togaplimb[bone_name] then
-            gore_mod_bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name])
+            gore_mod_bonemerge_prop(ragdoll,bone_name_togaplimb[bone_name],bone_name)
         end
     end
 end )
@@ -110,7 +113,11 @@ hook.Add( "noob_gore_make_limb_blood", "do limb_blood", function(ragdoll,bone_na
             
             local effectdata = EffectData()
             effectdata:SetEntity(meme)
-            effectdata:SetFlags(0)
+            if ragdoll.goremod_bloodColor_is_YELLOW then
+                effectdata:SetFlags(1) 
+            else
+                effectdata:SetFlags(0)
+            end
             util.Effect("goremod_blood_spray", effectdata)
         end)
     end

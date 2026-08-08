@@ -106,8 +106,7 @@ local function make_materials(tbl)
     return materials
 end
 
-local decal_mats = make_materials(decals)
-local particle_mats = make_materials(particles)
+
 
 local min_strenght = 0.25
 
@@ -118,9 +117,29 @@ function EFFECT:Init(data)
 
     local flags = data:GetFlags()
     
+    if flags == 1 then --it's just works :)
+        local particles = {
+            "decals/trail_yellow",
+        }
+        local decals = {
+            "decals/yblood1",
+            "decals/yblood2",
+            "decals/yblood3",
+            "decals/yblood4",
+            "decals/yblood5",
+            "decals/yblood6",
+        }
+        
+        decal_mats = make_materials(decals)
+        particle_mats = make_materials(particles)
+    else
+                decal_mats = make_materials(decals)
+        particle_mats = make_materials(particles)
+    end
+
     -- Apply reps multiplier to particle count
     local reps_multiplier = GetConVar("goremod_blood_stream_reps_multiplier"):GetFloat()
-    self.reps = math.floor(((flags == 1 and particle_reps_burst) or (flags == 0 and particle_reps_stream) or 0) * reps_multiplier)
+    self.reps = math.floor((particle_reps_stream or 0) * reps_multiplier)
 
     -- Get customizable values as LOCAL variables so they're captured in timer closure
     local size_mult = GetConVar("goremod_stream_size"):GetFloat()

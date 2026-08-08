@@ -108,6 +108,9 @@ function GibCallback(myself, boneCount)
 	if not myself:GetParent():IsValid() then
 		myself:Remove() 
 	end
+	if not myself.main_bone then
+		myself:Remove() 
+	end
     for i = 0, boneCount - 1 do
         if myself.slice_gib[i] ~= i then
             local mat = myself:GetBoneMatrix( i )

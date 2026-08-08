@@ -158,7 +158,7 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		if dmg_data then
 			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
-			PhysicsObject:AddVelocity(dmg_data.dmg_force/18)	
+			PhysicsObject:AddVelocity(dmg_data.dmg_force/18 )	
 		end
 		ragdollGIB.gib_bone = {}
 		if ragdoll.bonegap_for_limb then
@@ -347,9 +347,9 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 		end
 
 		local dmg_data = {
-            dmg_force = force/2
+            dmg_force = force/2 + Vector(math.Rand(-3000, 3000), math.Rand(-3000, 3000), math.Rand(-3000, 3000))
         }
-
+			
 		if ragdoll:GetManipulateBoneScale(boneid) ~= Vector(0.000000,0.000000,0.000000) then
 			ParticleEffect("blood_advisor_puncture",phys:GetPos(), ragdoll:GetAngles(), self)  
 			hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
@@ -362,7 +362,7 @@ function gore_mod_gib_ragdolll(ragdoll,force,Particle)
 	SafeRemoveEntity(ragdoll)
 end
 
-function gore_mod_bonemerge_prop(ragdoll,model)
+function gore_mod_bonemerge_prop(ragdoll,model,bone_name)
 	local npc_model = ragdoll:GetModel()
 	local attachments = ragdoll:GetAttachments()
 	local Attachment = nil
@@ -381,7 +381,11 @@ function gore_mod_bonemerge_prop(ragdoll,model)
 	ragdoll.bonemerge_prop:Activate()
 	ragdoll.bonemerge_prop:SetSolid(SOLID_NONE)
 	ragdoll.bonemerge_prop:AddEffects(EF_BONEMERGE)
+	ragdoll.bonemerge_prop.bonename_parent = bone_name
 	ragdoll:DeleteOnRemove(ragdoll.bonemerge_prop)
+	if ragdoll.goremod_bloodColor_is_YELLOW then --add ugly piss
+        ragdoll.bonemerge_prop:SetColor( Color( 255, 255, 0, 255 ))
+    end
 end
 
 concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
