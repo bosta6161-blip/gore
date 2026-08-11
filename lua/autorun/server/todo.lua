@@ -1,10 +1,6 @@
 /*--------------------------------------------------
 todo
-trailer
-descrisao
-aurrumada final no codigo
-player suport
-mapa
+map
 face on decap
 ragdoll blacklist
 leg injure

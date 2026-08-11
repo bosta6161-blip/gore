@@ -107,21 +107,21 @@ end
 function GibCallback(myself, boneCount)
 	if not myself:GetParent():IsValid() then
 		myself:Remove() 
+		return 
 	end
-	if not myself.main_bone then
-		myself:Remove() 
+	if myself.main_bone then
+		for i = 0, boneCount - 1 do
+			if myself.slice_gib[i] ~= i and myself.main_bone then
+				local mat = myself:GetBoneMatrix( i )
+				if ( !mat ) then continue end
+				local Pos = myself:GetBoneMatrix(myself.main_bone):GetTranslation()
+		
+				mat:Scale( vector_origin ) //vector_origin = Vector( 0, 0, 0 )
+				mat:SetTranslation( Pos )
+				myself:SetBoneMatrix( i, mat )
+			end
+		end
 	end
-    for i = 0, boneCount - 1 do
-        if myself.slice_gib[i] ~= i then
-            local mat = myself:GetBoneMatrix( i )
-            if ( !mat ) then continue end
-            local Pos = myself:GetBoneMatrix(myself.main_bone):GetTranslation()
-    
-            mat:Scale( vector_origin ) //vector_origin = Vector( 0, 0, 0 )
-            mat:SetTranslation( Pos )
-            myself:SetBoneMatrix( i, mat )
-        end
-    end
 end
 
 hook.Add("PreCleanupMap", "Ragdoll_GibsCleanup", function()

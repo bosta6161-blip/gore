@@ -216,25 +216,7 @@ function GoremodOpenConfirmMenu()
 
             gore_mod_Add_slider(content,"Blood sound volume","goremod_blood_sound_volume",0,2)
             gore_mod_Add_label(content,"Volume for blood impact sounds",true )
-
-            /*-- Blood Stream Size
-            local sizeSlider = panel:NumSlider("Blood Stream Size", "nextgenblood4_stream_size", 0.1, 10, 2)
-            
-
-            
-            
-            -- Blood Stream Duration (Reps)
-            local repsSlider = panel:NumSlider("Duration Multiplier", "nextgenblood4_blood_stream_reps_multiplier", 0.1, 10, 2)
-            
-
-
-            */
         end
-
-
-
-
-
     end
 
     local pages = {
@@ -263,14 +245,38 @@ function GoremodOpenConfirmMenu()
     end
     OpenPage("General")
 end
+concommand.Add("goremod_OpenConfirmMenu", function()
+	GoremodOpenConfirmMenu()
+end)
+
+hook.Add( "PopulateToolMenu", "Add_Goremod_Settings", function()
+    spawnmenu.AddToolMenuOption("Options", "Gore", "Noob gore mod 2", "Noob gore mod 2", "", "", function(panel)
+        panel:Clear()
+
+        local OpenConfirmMenu = vgui.Create("DButton", panel)
+        OpenConfirmMenu:Dock(TOP)
+        OpenConfirmMenu:DockMargin(20,20,20,0)
+        OpenConfirmMenu:SetTall(40)
+        OpenConfirmMenu:SetText("")
+        OpenConfirmMenu.Paint = function(self, w, h)
+            local col = OpenConfirmMenu:IsHovered() and Color(70,120,255) or Color(56,56,56)
+            draw.RoundedBox(6, 0, 0, w, h, col)
+            draw.SimpleText("OpenConfirmMenu", "smash", 15, h/2, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        end
+        OpenConfirmMenu.DoClick = function()
+            RunConsoleCommand('goremod_OpenConfirmMenu')
+            surface.PlaySound("garrysmod/save_load"..math.random(1,3)..".wav")
+        end
+	end )
+end )
 
 list.Set("DesktopWindows", "goremodconfig", {
 	title = "goremodconfig",
 	icon = "gui/effects/bloodimpact.png",
 	init = function(icon, window)
-	if IsValid(window) then 
-		window:Remove() 
-	end
-	GoremodOpenConfirmMenu()
-end
+        if IsValid(window) then 
+            window:Remove() 
+        end
+        RunConsoleCommand('goremod_OpenConfirmMenu')
+    end
 })

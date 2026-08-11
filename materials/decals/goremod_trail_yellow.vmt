@@ -1,6 +1,6 @@
 "UnlitGeneric"
 {
-	"$basetexture" "decals/trail"
+	"$basetexture" "decals/goremod_trail_yellow"
 	"$nocull" 1
 	"$nodecal" 1
 	"$nolod" 1

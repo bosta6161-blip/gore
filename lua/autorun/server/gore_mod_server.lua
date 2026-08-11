@@ -90,12 +90,14 @@ function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
             end
             local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
             local bone_name = ragdoll:GetBoneName( bone ) 	
-            print(bone_name)
 
+            if GetConVar("goremod_debug"):GetBool() then
+                print(bone_name.."is hit")
+            end
             if ragdoll.gore_mod_boneHealth[PhysicsBone] then
 				ragdoll.gore_mod_boneHealth[PhysicsBone] = ragdoll.gore_mod_boneHealth[PhysicsBone] - dmg_data.dmg_total_damege
 			end	
-            if ragdoll.gore_mod_boneHealth[PhysicsBone] <= 0 and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone then 
+            if  ragdoll.gore_mod_boneHealth[PhysicsBone] and ragdoll.gore_mod_boneHealth[PhysicsBone] <= 0 and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     dmg_data.slice = true 
                 else
@@ -103,7 +105,7 @@ function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
                 end
                 gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
             end
-        end
+    end
 end
 hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib script
     if npc:IsNPC() then

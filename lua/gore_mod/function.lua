@@ -126,9 +126,11 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 	if !ragdoll.gib_bone then
 		ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
 	end
-
+	if !ragdoll.bonegap_for_limb then
+		ragdoll.bonegap_for_limb = {}
+	end
 	local ragdollGIB = ents.Create("prop_ragdoll")
-    if IsValid(ragdollGIB) and IsValid(ragdoll) and ragdoll.gib_bone[PhysBone] ~= PhysBone then
+    if IsValid(ragdollGIB) and IsValid(ragdoll) and ragdoll.gib_bone[PhysBone] ~= PhysBone and ragdoll.bonegap_for_limb[bone_id] ~= bone_id then
     	ragdollGIB:SetModel(ragdoll:GetModel())
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
@@ -268,11 +270,13 @@ end)
 
 function gore_mod_ForcePhysBonePos(ragdoll)
 	for bone, v in pairs(ragdoll.gib_bone) do
-		local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(ragdoll:TranslatePhysBoneToBone(bone)))
-		local gibbed_physobj = ragdoll:GetPhysicsObjectNum(bone)
-		local parent_physobj = ragdoll:GetPhysicsObjectNum(bone_parent)
-		gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
-		gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
+		if ragdoll:IsValid() then
+			local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(ragdoll:TranslatePhysBoneToBone(bone)))
+			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(bone)
+			local parent_physobj = ragdoll:GetPhysicsObjectNum(bone_parent)
+			gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
+			gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
+		end
 	end
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
@@ -393,19 +397,16 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
-
-
-
-
 		if !ragdoll.bonegap_for_limb then
 			ragdoll.bonegap_for_limb = {}
 		end
-		ragdoll.bonegap_for_limb[bone_id] = bone_id
+
 		if dmg_data.slice == true and not ragdoll.no_limb and not dmg_data.nogibs == true then
 			gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		else
 			ParticleEffect("blood_impact_red_01_goop", ragdoll:GetBonePosition(bone_id), ragdoll:GetAngles(), self)
 		end
+		ragdoll.bonegap_for_limb[bone_id] = bone_id
 		gore_mod_gib_PhysBone(ragdoll,bone_name,dmg_data)
 
 		hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name

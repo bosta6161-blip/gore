@@ -1,4 +1,4 @@
-hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
+hook.Add("EntityTakeDamage", "ççp", function(ragdoll, dmginfo)
 	if GetConVar("goremod_enable"):GetBool() == true and  GetConVar("goremod_can_gib_ragdoll"):GetBool() == true then
 		if ragdoll:IsRagdoll() and ragdoll.destructible_Corpse and CurTime() > ragdoll.gib_start_delay then 
             if !ragdoll.gib_bone then
@@ -9,10 +9,12 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 dmg_pos = dmginfo:GetDamagePosition(),
                 dmg_force = dmginfo:GetDamageForce(),
                 dmg_dir = dmginfo:GetDamageForce():Angle(),
+                dmg_total_damege = dmginfo:GetDamage(),
                 slice = false 
             }
 			local doDamege = true 
-			if dmginfo:GetDamageType() == DMG_CRUSH and dmginfo:GetDamage() < 500 then
+            print(dmg_data.dmg_total_damege)
+			if dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege < 100 then
 				doDamege = false    
 			end 
             
@@ -39,19 +41,22 @@ hook.Add("EntityTakeDamage", "goremod_damege", function(ragdoll, dmginfo)
                 end
 			end
 
-			if ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and ragdoll.goremod_bone_to_ignore[bone] ~= bone and doDamege == true then 
+			if ragdoll.gore_mod_boneHealth[hit] and ragdoll.gore_mod_boneHealth[hit] <= 0 and ragdoll.gib_bone[hit] ~= hit and ragdoll.goremod_bone_to_ignore[bone] ~= bone and doDamege == true then 
                 if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
                     if dmg_data.dmg_type == 1 and GetConVar("goremod_DMG_CRUSH_slice_ragdoll"):GetBool() == false then
                         dmg_data.slice = false     
                     else
                         dmg_data.slice = true 
                     end
-
+                    if bone_name == "ValveBiped.Bip01_Spine2" then
+                        ragdoll.gib_start_delay = CurTime() + 1  --make damege imunit
+                    end
                 else
                     ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), ragdoll)
                 end
                 if bone == 0 then
                     if bone_name == "ValveBiped.Bip01_Pelvis" and not ragdoll.goremod_is_gibbed and not ragdoll.no_limb then
+                        ragdoll.gib_start_delay = CurTime() + 1 --make damege imunit
                         ragdoll.goremod_is_gibbed = true 
                         hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,"ValveBiped.Bip01_Pelvis",dmg_data) --call this hook to make gibs based on bone name
                         gore_mod_decap_ragdoll(ragdoll,"ValveBiped.Bip01_Spine2",dmg_data)

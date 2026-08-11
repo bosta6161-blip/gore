@@ -36,10 +36,10 @@ function TOOL:LeftClick(trace)
 			slice = false 
 		}
 		local hitposition = trace.HitPos --get HitPos from trace
-		local hit = GetClosestPhysBone(ent,hitposition)
+		local hit = gore_mod_GetClosestPhysBone_on_ragdoll(ent,hitposition)
 		local bone = ent:TranslatePhysBoneToBone(hit)
 		local bone_name = ent:GetBoneName( bone ) 	
-		dismember_limb(ent,bone_name,dmg_data) 
+		gore_mod_dismember_limb(ent,bone_name,dmg_data) 
 
 		ent:EmitSound('garrysmod/save_load'..math.random(1,3)..'.wav', 75, 100, 0.4) --make funny sound
 	end
@@ -57,10 +57,10 @@ function TOOL:RightClick(trace)
 			slice = true  
 		}
 		local hitposition = trace.HitPos --get HitPos from trace
-		local hit = GetClosestPhysBone(ent,hitposition)
+		local hit = gore_mod_GetClosestPhysBone_on_ragdoll(ent,hitposition)
 		local bone = ent:TranslatePhysBoneToBone(hit)
 		local bone_name = ent:GetBoneName( bone ) 	
-		dismember_limb(ent,bone_name,dmg_data)
+		gore_mod_dismember_limb(ent,bone_name,dmg_data)
 		ent:EmitSound('garrysmod/save_load'..math.random(1,3)..'.wav', 75, 100, 0.4) --make funny sound
 	end
 end
@@ -71,7 +71,7 @@ function TOOL:Reload(trace)
 		return
 	end
 	if IsValid(ent) and ent:IsRagdoll() then
-		gib_ragdolll(ent,Vector(0,0,0),true)
+		gore_mod_gib_ragdolll(ent,Vector(0,0,0),true)
 	end
 end
 end

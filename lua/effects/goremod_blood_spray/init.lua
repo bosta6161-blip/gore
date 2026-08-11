@@ -1,6 +1,6 @@
 -- These are kinda ugly, you probably want to change them:
 local particles = {
-    "decals/trail",
+    "decals/goremod_trail",
 }
 
 -- Use these, but shaderless i guess, or maybe use more of a "stain" rather than a "splat":
@@ -119,7 +119,7 @@ function EFFECT:Init(data)
     
     if flags == 1 then --it's just works :)
         local particles = {
-            "decals/trail_yellow",
+            "decals/goremod_trail_yellow",
         }
         local decals = {
             "decals/yblood1",
