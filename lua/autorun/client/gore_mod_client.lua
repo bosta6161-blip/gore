@@ -1,37 +1,38 @@
 net.Receive( "noob_gore_benemerge", function()
     local ent = net.ReadEntity()
-    local main_bone = net.ReadInt( 8 ) -- use the same number of bits that were written.
+    local bonename = net.ReadString()
 	local ragdoll_parent = net.ReadEntity()
 	if not ragdoll_parent:IsValid() then
 		return 
 	end
-
-    local ragdoll = ClientsideRagdoll( ragdoll_parent:GetModel() )		-- Create a ragdoll using the player's model
-	ragdoll:SetRagdollPos( ragdoll_parent:GetPos() )
-	ragdoll:SetNoDraw( false )
+	local ragdoll = ClientsideModel( ragdoll_parent:GetModel() )		-- Create a ragdoll using the player's model
+	ragdoll:SetNoDraw(true)
 	ragdoll:DrawShadow( true )
-	ragdoll:SetSkin( ragdoll_parent:GetSkin() )
-	ragdoll:SetParent(ragdoll_parent)
-	ragdoll:AddEffects(EF_BONEMERGE)
-	ragdoll:SetLOD(0)
-	ragdoll.is_a_ragdoll_gib = true 
-    ragdoll.slice_gib = {} 
-	ragdoll.main_bone = main_bone
-	ragdoll.slice_gib[main_bone] = main_bone
-	for i = 1, #ragdoll_parent:GetBodyGroups() do
-		ragdoll:SetBodygroup(i, ragdoll_parent:GetBodygroup(i))
-	end
-    sigma_children2(ragdoll,main_bone)
-    local PhysBone = ragdoll:TranslateBoneToPhysBone(main_bone)
-	for i=0, ragdoll:GetPhysicsObjectCount() - 1 do -- "ragdoll" being a ragdoll entity
-		local bone = ragdoll:TranslatePhysBoneToBone(i)
-		if ragdoll.slice_gib[bone] ~= bone then
-			colideBone2(ragdoll,i)
-		end
-	end
 
+	if IsValid(ent) then
+		ragdoll:SetSkin( ent:GetSkin() )
+		ragdoll:SetColor(ent:GetColor())
+	end
+	ragdoll:SetLOD(0)
 	--ragdoll:SnatchModelInstance(ent)
-	ragdoll:AddCallback("BuildBonePositions",GibCallback)
+	ragdoll:SetupBones()
+	timer.Simple(0, function()
+		if IsValid(ragdoll_parent) and IsValid(ragdoll) then
+			ragdoll:SetParent(ragdoll_parent)
+			ragdoll:SetNoDraw(false)
+			ragdoll:AddEffects(EF_BONEMERGE)
+			ragdoll.is_a_ragdoll_gib = true 
+			ragdoll.slice_gib = {} 
+			ragdoll.main_bone = ragdoll:LookupBone(bonename)
+			ragdoll.slice_gib[ragdoll.main_bone] = ragdoll.main_bone
+			for i = 1, #ragdoll_parent:GetBodyGroups() do
+				ragdoll:SetBodygroup(i, ragdoll_parent:GetBodygroup(i))
+			end
+			sigma_children2(ragdoll,ragdoll:LookupBone(bonename))
+
+			ragdoll:AddCallback("BuildBonePositions",GibCallback)
+		end
+	end)	
 end )
 
 /*
@@ -67,60 +68,30 @@ function colideBone2(ragdoll,phys_bone)
 	colide:EnableGravity(false)
 end
 function sigma_children2(ragdoll,bone_id) --get children bones
-	local sigma = ragdoll:GetChildBones(bone_id)
-    for k, v in pairs(sigma) do --no more shit code
-		local PhysBone = ragdoll:TranslateBoneToPhysBone(v)
-		local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
-				
-		if ObjectNum:IsValid() then --check if the object is valid
-			ragdoll.slice_gib[v] = v
-			sigma_children2(ragdoll,v)
-		end
-    end
-end
-local csRag = FindMetaTable( "CSEnt" )
--- csRag:SetPos() doesn't work for C_ClientRagdoll entities.
-function csRag:SetRagdollPos(pos)
-	
-	for i = 0, self:GetPhysicsObjectCount() - 1 do 
-		-- Get the physics object (PhysBone)
-		local phys = self:GetPhysicsObjectNum(i)
-		-- Get the position of the physics object relative to the ragdoll's position
-		local localPos = self:WorldToLocal( phys:GetPos() )
-		-- Set the physics object's location to the new position using the relative position to it's previous position
-		phys:SetPos( pos + localPos )
-		
+	local children = ragdoll:GetChildBones(bone_id)
+	for _, child in ipairs(children) do  --no more shit code
+
+		ragdoll.slice_gib[child] = child
+		sigma_children2(ragdoll,child)
 	end
-	
 end
-function SetRagdollPos69(ent,ent2)
-	
-	for i = 0, ent2:GetPhysicsObjectCount() - 1 do 
-        local myPhys = ent2:GetPhysicsObjectNum(i)
-        local phys = ent:GetPhysicsObjectNum(i)
-        phys:SetPos(myPhys:GetPos())
-        phys:SetAngles(myPhys:GetAngles())
-		
-	end
-	
-end
+
 function GibCallback(myself, boneCount)
+	for i = 0, boneCount - 1 do
+		if myself.slice_gib[i] ~= i and myself.main_bone ~= nil then
+			local mat = myself:GetBoneMatrix( i )
+			if ( !mat ) then continue end
+			local Pos = myself:GetBoneMatrix(myself.main_bone):GetTranslation()
+	
+			mat:Scale( vector_origin ) //vector_origin = Vector( 0, 0, 0 )
+			mat:SetTranslation( Pos )
+			myself:SetBoneMatrix( i, mat )
+		end
+	end
 	if not myself:GetParent():IsValid() then
+		myself:SetNoDraw(false)
 		myself:Remove() 
 		return 
-	end
-	if myself.main_bone then
-		for i = 0, boneCount - 1 do
-			if myself.slice_gib[i] ~= i and myself.main_bone then
-				local mat = myself:GetBoneMatrix( i )
-				if ( !mat ) then continue end
-				local Pos = myself:GetBoneMatrix(myself.main_bone):GetTranslation()
-		
-				mat:Scale( vector_origin ) //vector_origin = Vector( 0, 0, 0 )
-				mat:SetTranslation( Pos )
-				myself:SetBoneMatrix( i, mat )
-			end
-		end
 	end
 end
 

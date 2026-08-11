@@ -134,6 +134,7 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     	ragdollGIB:SetModel(ragdoll:GetModel())
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
         ragdollGIB:SetSkin( ragdoll:GetSkin() )
+		ragdollGIB:SetColor(ragdoll:GetColor())
     	ragdollGIB:Spawn()
 
 		if GetConVar("goremod_Disable_ragdoll_colision"):GetBool() then
@@ -150,13 +151,23 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		ragdollGIB:SetNoDraw(true )
 		ragdollGIB:DrawShadow(false )
 		ragdollGIB.goremod_is_ragdoll_limb = true 
-		timer.Simple(0, function()
-		net.Start( "noob_gore_benemerge" )
-			net.WriteEntity(ragdoll) --the original ragdoll
-			net.WriteInt(bone_id, 8 ) --bone to get cut
-			net.WriteEntity(ragdollGIB)--the ragdoll limb
-		net.Broadcast()
+		timer.Simple(0.05, function()
+			if not ragdollGIB:IsValid() then
+				timer.Simple(0.5, function()
+					net.Start( "noob_gore_benemerge" )
+						net.WriteEntity(ragdoll) --the original ragdoll
+						net.WriteString(bone_name)
+						net.WriteEntity(ragdollGIB)--the ragdoll limb
+					net.Broadcast()
+				end)
+			end
+			net.Start( "noob_gore_benemerge" )
+				net.WriteEntity(ragdoll) --the original ragdoll
+				net.WriteString(bone_name)
+				net.WriteEntity(ragdollGIB)--the ragdoll limb
+			net.Broadcast()
 		end)
+
 		if dmg_data then
 			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
 			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
@@ -170,8 +181,6 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 		table.insert(gib_PhysBone_RAGDOLLS,ragdollGIB)
 		table.insert(limb_ragdoll_count, ragdollGIB)
 		if ragdoll.bonegap_for_limb then
-
-
 			for boneid, v in pairs(ragdoll.bonegap_for_limb) do
 				local bone_name2 = ragdoll:GetBoneName(boneid)
 				if boneid ~= ragdollGIB:GetBoneParent(ragdollGIB.main_bone_sigma) and boneid ~= ragdollGIB.main_bone_sigma and ragdollGIB.slice_gib[boneid] == boneid then

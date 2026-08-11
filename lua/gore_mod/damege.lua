@@ -13,7 +13,7 @@ hook.Add("EntityTakeDamage", "ççp", function(ragdoll, dmginfo)
                 slice = false 
             }
 			local doDamege = true 
-            print(dmg_data.dmg_total_damege)
+
 			if dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege < 100 then
 				doDamege = false    
 			end 
