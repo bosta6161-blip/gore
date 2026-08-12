@@ -21,7 +21,7 @@ function EFFECT:Init(data)
 	
 	-- Blood mist
 	for _ = 0, 8 do
-		local mist = emitter:Add("particle/smokesprites_000" .. math.random(1, 9), origin)
+		local mist = emitter:Add("particle/smokesprites_0009" .. math.random(1, 9), origin)
 		if mist then
 			mist:SetVelocity(Vector(math.random(-20, 20), math.random(-20, 20), math.random(-30, 30)))
 			mist:SetDieTime(math.Rand(2.2, 2.4))

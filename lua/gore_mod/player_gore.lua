@@ -3,15 +3,28 @@ local goremod_player_death_info = {}
 -- Cache last damage info for each player
 hook.Add("EntityTakeDamage", "GoreMod_CachePlayerDamage", function(target, dmginfo)
     if target:IsPlayer() and GetConVar("goremod_enable"):GetBool() then
+        local dmgpos = dmginfo:GetDamagePosition()
+        local dmgforce = dmginfo:GetDamageForce()
+
+        -- falldamage..
+        if bit.band(dmginfo:GetDamageType(), DMG_FALL) > 0 then
+            dmgpos = target:GetPos()
+            dmgforce = target:GetVelocity()
+            if dmgforce:LengthSqr() < 1 then
+                dmgforce = Vector(0, 0, -400) -- velocity already zeroed
+            end
+        end
+
         goremod_player_death_info[target] = {
             dmgtype = dmginfo:GetDamageType(),
             hitgroup = target:LastHitGroup(),
-            dmgpos = dmginfo:GetDamagePosition() or target:GetPos(),
+            dmgpos = dmgpos or target:GetPos(),
             attacker = dmginfo:GetAttacker(),
             inflictor = dmginfo:GetInflictor(),
             amount = dmginfo:GetDamage(),
-            dmg_force = dmginfo:GetDamageForce(),
-            dmg_dir = dmginfo:GetDamageForce():Angle()
+            dmg_force = dmgforce,
+            dmg_dir = dmgforce:Angle(),
+            time = CurTime()
         }
     end
 end)
@@ -36,8 +49,11 @@ hook.Add("CreateEntityRagdoll", "GoreMod_ApplyToPlayerRagdoll", function(owner, 
         end
     end)
 
-    if not ragdoll.GravGunPunt then
-        local info = goremod_player_death_info[owner] or {}
+    -- for ragdoll death v2
+    local info = goremod_player_death_info[owner]
+    local isFreshDeath = info and info.time and (CurTime() - info.time) < 3
+
+    if isFreshDeath then
         local dmg_data = {
             dmg_type = info.dmgtype,
             dmg_pos = info.dmgpos,
@@ -48,8 +64,8 @@ hook.Add("CreateEntityRagdoll", "GoreMod_ApplyToPlayerRagdoll", function(owner, 
             slice = false 
         }
 
-
         goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
+        goremod_player_death_info[owner] = nil
     end
 end)
 --noob gore-ragdoll death bridge made by Defrektif (that's me hello)

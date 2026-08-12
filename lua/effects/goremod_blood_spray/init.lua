@@ -106,7 +106,31 @@ local function make_materials(tbl)
     return materials
 end
 
+local function SpawnCollisionParticle(pos,shitColor)
+    if math.random(1,4) == 1 then return end
+    local emitter = ParticleEmitter(pos)
 
+    if not emitter then return end
+
+    local mist = emitter:Add("particle/smokesprites_000" .. math.random(1, 9), pos)
+    if mist then
+        mist:SetVelocity(Vector(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5)))
+        mist:SetDieTime(math.Rand(2.2, 2.4))
+        mist:SetStartAlpha(255)
+        mist:SetEndAlpha(0)
+        mist:SetStartSize(10 / 2)
+        mist:SetEndSize(10)
+        mist:SetRoll(1)
+        mist:SetRollDelta(0)
+        mist:SetAirResistance(1)
+        mist:SetGravity(Vector(math.Rand(-20, 20), math.Rand(-20, 20), math.Rand(10, -10)))
+        mist:SetColor(shitColor)
+        mist:SetCollide(true)
+    end
+    emitter:Finish()
+end
+                    
+local blood_water_color = Color(255, 23, 2)
 
 local min_strenght = 0.25
 
@@ -129,7 +153,7 @@ function EFFECT:Init(data)
             "decals/yblood5",
             "decals/yblood6",
         }
-        
+        blood_water_color = Color(255, 255,0)
         decal_mats = make_materials(decals)
         particle_mats = make_materials(particles)
     else
@@ -232,8 +256,11 @@ function EFFECT:Init(data)
             particle:SetVelocity(base_velocity)
             
             particle:SetCollide(true)
-            particle:SetCollideCallback(function(_, pos, normal)
-                if math.random(1, impact_chance) == 1 and (effect_self.CurrentStrenght or min_strenght) > 0.2 and GetConVar("goremod_blood_do_decal"):GetBool() == true then
+            particle:SetCollideCallback(function(_, pos, normal,hitnormal)
+                if bit.band(util.PointContents(pos),CONTENTS_WATER) == CONTENTS_WATER and GetConVar("goremod_blood_do_decal"):GetBool() then
+                    SpawnCollisionParticle(particle:GetPos(),blood_water_color)
+                    particle:SetDieTime(0)
+                elseif math.random(1, impact_chance) == 1 and (effect_self.CurrentStrenght or min_strenght) > 0.2 and GetConVar("goremod_blood_do_decal"):GetBool() == true then
                     -- Play blood drip sound
                     sound.Play(table.Random(drip_sounds), pos, sound_level, math.Rand(95, 105), GetConVar("goremod_blood_sound_volume"):GetFloat())
                     

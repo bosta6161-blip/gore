@@ -1,8 +1,75 @@
 include( "gore_mod/ConVar.lua" )
 
+CreateConVar("goremod_killshot_dismember_ratio", "0.5", FCVAR_ARCHIVE, "the higher this is, the harder it is to dismember with a killshot")
+
+CreateConVar("goremod_explosion_limb_gib", "1", FCVAR_ARCHIVE, "toggles dismember upon explosions. only works when the other explosion option is off")
+CreateConVar("goremod_explosion_limb_gib_radius", "250", FCVAR_ARCHIVE, "max distance from explosion to be dismembered")
+CreateConVar("goremod_explosion_limb_gib_ratio", "0.67", FCVAR_ARCHIVE, "the higher this is, the harder it is to dismember with an explosion")
+CreateConVar("goremod_explosion_limb_gib_force", "200", FCVAR_ARCHIVE, "force applied to dismembered limbs upon explosion. tune it if it's too high or low")
+
+local goremod_explosion_limb_bones = {
+    "ValveBiped.Bip01_Head1",
+    "ValveBiped.Bip01_L_Upperarm",
+    "ValveBiped.Bip01_R_Upperarm",
+    "ValveBiped.Bip01_L_Thigh",
+    "ValveBiped.Bip01_R_Thigh",
+}
+
+function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
+    if dmg_data.dmg_pos == nil or dmg_data.dmg_total_damege == nil then return end
+
+    if !ragdoll.gib_bone then
+        ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+    end
+
+    local radius = GetConVar("goremod_explosion_limb_gib_radius"):GetFloat()
+    local ratio = GetConVar("goremod_explosion_limb_gib_ratio"):GetFloat()
+    local base_force = GetConVar("goremod_explosion_limb_gib_force"):GetFloat()
+
+    for _, bone_name in ipairs(goremod_explosion_limb_bones) do
+        local boneID = ragdoll:LookupBone(bone_name)
+        if boneID then
+            local physBone = ragdoll:TranslateBoneToPhysBone(boneID)
+            local maxHealth = ragdoll.gore_mod_boneHealth[physBone]
+            local bonePos = ragdoll:GetBonePosition(boneID)
+            local dist = bonePos:Distance(dmg_data.dmg_pos)
+
+            if maxHealth and dist <= radius and ragdoll.gib_bone[physBone] ~= physBone then
+                ragdoll.gore_mod_boneHealth[physBone] = maxHealth - dmg_data.dmg_total_damege
+
+                if dmg_data.dmg_total_damege >= (maxHealth * ratio) then
+                    local force_dir = bonePos - dmg_data.dmg_pos
+                    if force_dir:Length() < 1 then force_dir = VectorRand() end
+                    force_dir = force_dir:GetNormalized()
+
+                    local limb_dmg_data = {
+                        dmg_type = dmg_data.dmg_type,
+                        dmg_pos = bonePos,
+                        dmg_force = force_dir * base_force,
+                        dmg_dir = force_dir:Angle(),
+                        dmg_total_damege = dmg_data.dmg_total_damege,
+
+                        slice = true,
+                    }
+                    gore_mod_dismember_limb(ragdoll, bone_name, limb_dmg_data)
+                end
+            end
+        end
+    end
+    gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+end
+
 function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
-    if GetConVar("goremod_can_npc_explode"):GetBool() and dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 and dmg_data.is_player ~= true then
-        gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+    if !ragdoll.gib_bone then
+        ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
+    end
+
+    if dmg_data.dmg_type == 64 or dmg_data.dmg_type == 1 and dmg_data.dmg_total_damege > 100 then
+        if GetConVar("goremod_npc_explode_type"):GetInt() == 1 then
+            gore_mod_gib_ragdolll(ragdoll,dmg_data.dmg_force,true)
+        elseif GetConVar("goremod_npc_explode_type"):GetInt() == 2 then
+            goremod_explosion_dismember_limbs(ragdoll,dmg_data)
+        end
     elseif owner.goremod_is_slice_inhalf and owner:LookupBone("ValveBiped.Bip01_Spine2") ~= nil and GetConVar("goremod_sawblade_slice_EXPEREMENTAL"):GetBool()then
         dmg_data.slice = true 
         dmg_data.dmg_force = Vector(0,0,16000)
@@ -84,9 +151,14 @@ function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
                 return 
             end
 
-            local PhysicsBone = gore_mod_GetClosestPhysBone(ragdoll,dmg_data).PhysicsBone
-            if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
+            local PhysicsBone
+            if dmg_data.dmg_type and bit.band(dmg_data.dmg_type, DMG_FALL) > 0 then
+                -- fall damage bullcrap (look at player_gore.lua)
+                PhysicsBone = gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,dmg_data.dmg_pos)
+            elseif table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) then
                 PhysicsBone = gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,dmg_data.dmg_pos) --get hit physbone
+            else
+                PhysicsBone = gore_mod_GetClosestPhysBone(ragdoll,dmg_data).PhysicsBone
             end
             local bone = ragdoll:TranslatePhysBoneToBone(PhysicsBone)
             local bone_name = ragdoll:GetBoneName( bone ) 	
@@ -94,18 +166,52 @@ function goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
             if GetConVar("goremod_debug"):GetBool() then
                 print(bone_name.."is hit")
             end
-            if ragdoll.gore_mod_boneHealth[PhysicsBone] then
-				ragdoll.gore_mod_boneHealth[PhysicsBone] = ragdoll.gore_mod_boneHealth[PhysicsBone] - dmg_data.dmg_total_damege
-                if ragdoll.gore_mod_boneHealth[PhysicsBone] <= 0 and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone then 
-                    if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
-                        dmg_data.slice = true 
-                    else
-                        ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)                
-                    end
-                    gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
+
+            local maxHealth = ragdoll.gore_mod_boneHealth[PhysicsBone]
+            local killshot_ratio = GetConVar("goremod_killshot_dismember_ratio"):GetFloat()
+            local isKillshotDismember = maxHealth and killshot_ratio > 0 and dmg_data.dmg_total_damege >= (maxHealth * killshot_ratio)
+
+            if maxHealth then
+				ragdoll.gore_mod_boneHealth[PhysicsBone] = maxHealth - dmg_data.dmg_total_damege
+			end
+
+            if GetConVar("goremod_debug"):GetBool() then
+                print(bone_name.." killshot dmg "..dmg_data.dmg_total_damege.."/".. (maxHealth or -1) .." (needs ".. ((maxHealth or 0) * killshot_ratio) ..")")
+            end
+
+            if isKillshotDismember and ragdoll.gib_bone[PhysicsBone] ~= PhysicsBone then 
+                if table.HasValue( gore_mod_slice_damege,dmg_data.dmg_type) or bone_name == "ValveBiped.Bip01_Spine2" then
+                    dmg_data.slice = true 
+                else
+                    ParticleEffect("blood_advisor_puncture", ragdoll:GetBonePosition(bone), ragdoll:GetAngles(), self)                
                 end
-			end	
-    end
+                gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
+
+                -- a fatal fall targets both legs
+                if dmg_data.dmg_type and bit.band(dmg_data.dmg_type, DMG_FALL) > 0 then
+                    local mirrored_name = nil
+                    if bone_name:find("_L_") then
+                        mirrored_name = bone_name:gsub("_L_", "_R_")
+                    elseif bone_name:find("_R_") then
+                        mirrored_name = bone_name:gsub("_R_", "_L_")
+                    end
+
+                    if mirrored_name and ragdoll:LookupBone(mirrored_name) then
+                        local mirror_bone_id = ragdoll:LookupBone(mirrored_name)
+                        local mirror_physbone = ragdoll:TranslateBoneToPhysBone(mirror_bone_id)
+                        local mirror_maxHealth = ragdoll.gore_mod_boneHealth[mirror_physbone]
+
+                        if mirror_maxHealth then
+                            ragdoll.gore_mod_boneHealth[mirror_physbone] = mirror_maxHealth - dmg_data.dmg_total_damege
+                        end
+
+                        if mirror_maxHealth and dmg_data.dmg_total_damege >= (mirror_maxHealth * killshot_ratio) and ragdoll.gib_bone[mirror_physbone] ~= mirror_physbone then
+                            gore_mod_dismember_limb(ragdoll,mirrored_name,dmg_data)
+                        end
+                    end
+                end
+            end
+        end
 end
 hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib script
     if npc:IsNPC() then

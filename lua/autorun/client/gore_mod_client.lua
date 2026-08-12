@@ -102,4 +102,3 @@ hook.Add("PreCleanupMap", "Ragdoll_GibsCleanup", function()
         end
     end
 end)
-
