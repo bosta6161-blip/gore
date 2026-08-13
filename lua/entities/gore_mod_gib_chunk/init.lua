@@ -10,7 +10,8 @@ function ENT:Initialize()
     self:SetUseType( SIMPLE_USE )
 
     local phys = self:GetPhysicsObject()
-	
+
+    if not IsValid(phys) then return end
 	self:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
 	self.gib_Health = 40
 	self.damage_Start_delay = CurTime() + 1
@@ -18,7 +19,8 @@ function ENT:Initialize()
 
     table.insert(goremod_gib_count, self)
 end
-function ENT:Use(ply) 
+function ENT:Use(ply)
+    if not IsValid(ply) then return end
 	local Position = ply:GetEyeTrace()
 	if GetConVar("goremod_cannibalism"):GetBool() then
 		local health = ply:Health()
@@ -34,19 +36,38 @@ function ENT:Use(ply)
 	end
 end
 function ENT:Think()
-	if #goremod_gib_count > GetConVar("goremod_gib_limit"):GetInt() then
-        if IsValid(goremod_gib_count[1]) then
-            goremod_gib_count[1]:Remove()
+    local limit = math.max(0, GetConVar("goremod_gib_limit"):GetInt())
+    while #goremod_gib_count > limit do
+        local oldest = table.remove(goremod_gib_count, 1)
+        if IsValid(oldest) then
+            oldest:Remove()
         end
-        table.remove(goremod_gib_count, 1)
     end
-	if GetConVar("goremod_gib_fade_time"):GetFloat() < 998 then
-		timer.Simple(GetConVar("goremod_gib_fade_time"):GetFloat(), function()
-			if IsValid(self) then
-				self:Remove()
-			end
-		end)
-	end
+
+    if self.gore_fade_scheduled then
+        return
+    end
+
+    local fade = GetConVar("goremod_gib_fade_time"):GetFloat()
+    if fade < 998 and fade >= 0 then
+        self.gore_fade_scheduled = true
+        timer.Simple(fade, function()
+            if IsValid(self) then
+                self:Remove()
+            end
+        end)
+    else
+        self.gore_fade_scheduled = true
+    end
+end
+
+function ENT:OnRemove()
+    for i = #goremod_gib_count, 1, -1 do
+        if goremod_gib_count[i] == self then
+            table.remove(goremod_gib_count, i)
+            break
+        end
+    end
 end
 function ENT:PhysicsCollide(data, physobj)
 	if math.random(1, 8) == 1 then
@@ -72,7 +93,6 @@ function ENT:OnTakeDamage( dmginfo )
 		local dmg_pos = dmginfo:GetDamagePosition()
 		ParticleEffect("blood_impact_red_01_goop", dmg_pos, self:GetAngles(), self)
 		self.gib_Health = self.gib_Health - dmginfo:GetDamage()
-		print(self.gib_Health)
 		if self.gib_Health <= 0 and self.fucked == false   then
 			self.fucked = true 
 			if not (self:GetModel() == "models/props_junk/watermelon01_chunk02a.mdl") then
