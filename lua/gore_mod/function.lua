@@ -283,8 +283,10 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 			local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(ragdoll:TranslatePhysBoneToBone(bone)))
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(bone)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(bone_parent)
-			gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
-			gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
+			if parent_physobj ~= nil then
+				gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
+				gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
+			end
 		end
 	end
 end
