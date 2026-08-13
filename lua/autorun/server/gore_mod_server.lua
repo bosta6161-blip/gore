@@ -1,13 +1,6 @@
 include( "gore_mod/ConVar.lua" )
 
-CreateConVar("goremod_killshot_dismember_ratio", "0.5", FCVAR_ARCHIVE, "the higher this is, the harder it is to dismember with a killshot")
-
-CreateConVar("goremod_explosion_limb_gib", "1", FCVAR_ARCHIVE, "toggles dismember upon explosions. only works when the other explosion option is off")
-CreateConVar("goremod_explosion_limb_gib_radius", "250", FCVAR_ARCHIVE, "max distance from explosion to be dismembered")
-CreateConVar("goremod_explosion_limb_gib_ratio", "0.67", FCVAR_ARCHIVE, "the higher this is, the harder it is to dismember with an explosion")
-CreateConVar("goremod_explosion_limb_gib_force", "200", FCVAR_ARCHIVE, "force applied to dismembered limbs upon explosion. tune it if it's too high or low")
-
-local goremod_explosion_limb_bones = {
+goremod_explosion_limb_bones = {
     "ValveBiped.Bip01_Head1",
     "ValveBiped.Bip01_L_Upperarm",
     "ValveBiped.Bip01_R_Upperarm",
@@ -22,9 +15,7 @@ function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
         ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
     end
 
-    local radius = GetConVar("goremod_explosion_limb_gib_radius"):GetFloat()
-    local ratio = GetConVar("goremod_explosion_limb_gib_ratio"):GetFloat()
-    local base_force = GetConVar("goremod_explosion_limb_gib_force"):GetFloat()
+    local ratio = 0.67
 
     for _, bone_name in ipairs(goremod_explosion_limb_bones) do
         local boneID = ragdoll:LookupBone(bone_name)
@@ -34,7 +25,7 @@ function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
             local bonePos = ragdoll:GetBonePosition(boneID)
             local dist = bonePos:Distance(dmg_data.dmg_pos)
 
-            if maxHealth and dist <= radius and ragdoll.gib_bone[physBone] ~= physBone then
+            if maxHealth and dist <= 250 and ragdoll.gib_bone[physBone] ~= physBone then
                 ragdoll.gore_mod_boneHealth[physBone] = maxHealth - dmg_data.dmg_total_damege
 
                 if dmg_data.dmg_total_damege >= (maxHealth * ratio) then
@@ -45,7 +36,7 @@ function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
                     local limb_dmg_data = {
                         dmg_type = dmg_data.dmg_type,
                         dmg_pos = bonePos,
-                        dmg_force = force_dir * base_force,
+                        dmg_force = dmg_data.dmg_force,
                         dmg_dir = force_dir:Angle(),
                         dmg_total_damege = dmg_data.dmg_total_damege,
 

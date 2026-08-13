@@ -1,8 +1,9 @@
 --main options
-CreateConVar("goremod_enable", "1", FCVAR_ARCHIVE, "goremod_enable")
-CreateConVar("goremod_can_gib_only_npc_corpse", "1", FCVAR_ARCHIVE, "goremod_can_gib_only_npc_corpse")
-CreateConVar("goremod_can_gib_ragdoll", "1", FCVAR_ARCHIVE, "goremod_can_gib_ragdoll")
+CreateConVar("goremod_enable", "1", FCVAR_ARCHIVE, "Disable Noob gore mod.")
+CreateConVar("goremod_can_gib_only_npc_corpse", "1", FCVAR_ARCHIVE, "Disable gore to only ragdolls spawned by NPCs/nextbots/players.")
+CreateConVar("goremod_can_gib_ragdoll", "1", FCVAR_ARCHIVE, "After you kill the NPC, you can't destroy the body, this can help with performance when there's a lot going on.")
 CreateConVar("goremod_npc_explode_type", "1", FCVAR_ARCHIVE, "goremod_npc_explode_type")
+CreateConVar("goremod_killshot_dismember_ratio", "0.5", FCVAR_ARCHIVE, "the higher this is, the harder it is to dismember with a killshot")
 
 --_multipliers
 CreateConVar("goremod_limb_health_multiplier", "1", FCVAR_ARCHIVE, "goremod_limb_health_multiplier")
