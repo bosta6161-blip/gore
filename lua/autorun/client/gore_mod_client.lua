@@ -31,9 +31,58 @@ net.Receive( "noob_gore_benemerge", function()
 			sigma_children2(ragdoll,ragdoll:LookupBone(bonename))
 
 			ragdoll:AddCallback("BuildBonePositions",GibCallback)
+			--gore_mod_bonemerge_client_test(ragdoll,"ValveBiped.Bip01_Head1","models/props_junk/watermelon01.mdl")
 		end
 	end)	
 end )
+adsadaddsa = {
+    ["ValveBiped.Bip01_Head1"] = {
+        model = "models/props_junk/watermelon01.mdl",
+        localAng = Angle(180,110,90),
+        offset = Vector(-0.812,-2.608,0),
+        capScale = Vector(1, 1, 1),
+    },
+}
+function gore_mod_bonemerge_client_test(ragdoll,bone_name,model)
+	local model = ragdoll:GetModel()
+	local capScale = Vector(1, 1, 1)
+	local localAng = Angle(0, 0, 0)
+	local offset = Vector(0,0,0)
+
+	if adsadaddsa[bone_name] and not ragdoll.nogap then
+
+		local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+		local bone_parent = ragdoll:GetBoneParent(bone_id)
+		local bonepos,bone_rotation = ragdoll:GetBonePosition(bone_parent)
+
+		local gib_data = adsadaddsa[bone_name]
+		offset = gib_data.offset
+		local gap = ClientsideModel("models/props_junk/watermelon01.mdl")
+		local lpos, lang = WorldToLocal(bonepos,bone_rotation, ragdoll:GetBonePosition(bone_parent))
+
+
+
+
+		if not IsValid(gap) then return end
+
+		gap:SetModel(gib_data.model)               
+		gap:Spawn()
+		gap:SetNotSolid(true)
+		gap:DrawShadow(false)
+
+		gap:ManipulateBoneScale(0, gib_data.capScale) --gap scale
+		gap:FollowBone(ragdoll, bone_parent)
+
+		gap:SetLocalAngles(gib_data.localAng)
+		gap:SetLocalPos(lpos + offset)
+		gap.bonename_parent = bone_name
+		gap.is_gap = true 
+		if ragdoll.goremod_bloodColor_is_YELLOW then
+			gap:SetColor( Color( 255, 255, 0, 255 ))--add ugly piss efect
+		end
+		print(gap)
+	end
+end
 
 /*
 hook.Add("CreateClientsideRagdoll", "CreateClientsideRagdoll_Ent", function( ent, rag )

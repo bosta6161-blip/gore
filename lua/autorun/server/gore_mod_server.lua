@@ -227,8 +227,7 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
     end
 end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
-    if owner.is_madness_combat_npc == true then return end
-    if GetConVar("goremod_enable"):GetBool() then
+    if GetConVar("goremod_enable"):GetBool() and not owner.is_madness_combat_npc then
         ragdoll:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         local dmg_data = {
             dmg_type = owner.dmg_type,
@@ -241,15 +240,13 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
 
         gore_mod_ApplyCorpseEffects(ragdoll)
         goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
-
-
     end
 end)
 
 
 hook.Add("OnEntityCreated", "On_shit_ent_is_created", function(ragdoll)
     if GetConVar("goremod_enable"):GetBool() then 
-		if GetConVar("goremod_can_gib_only_npc_corpse"):GetBool() and ragdoll:GetClass() == "prop_ragdoll" then 
+		if GetConVar("goremod_can_gib_only_npc_corpse"):GetBool() and ragdoll:GetClass() == "prop_ragdoll" and not ragdoll.is_madness_combat_npc then 
 			timer.Simple(0, function()
 				if IsValid(ragdoll) and not ragdoll.destructible_Corpse then
 					gore_mod_ApplyCorpseEffects(ragdoll) 

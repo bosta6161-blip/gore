@@ -407,7 +407,8 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
     PrintTable(gib_PhysBone_RAGDOLLS)
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
-	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+	if ragdoll:LookupBone(bone_name) ~= 0 then
+		local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
 		if !ragdoll.bonegap_for_limb then
 			ragdoll.bonegap_for_limb = {}
 		end
@@ -423,7 +424,7 @@ function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 		hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 		hook.Call( "noob_gore_make_gore_sound", nil,ragdoll,bone_name) --call this hook to make sound on bone name
 		hook.Call( "noob_gore_make_limb_blood", nil,ragdoll,bone_name) --call this hook to make blood on bone name
-
+	end
 end
 
 function gore_mod_ApplyCorpseEffects(ragdoll)
