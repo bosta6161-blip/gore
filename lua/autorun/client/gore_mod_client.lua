@@ -35,7 +35,7 @@ net.Receive( "noob_gore_benemerge", function()
 		end
 	end)	
 end )
-adsadaddsa = {
+adsadaddsa = { --esse valor e de teste
     ["ValveBiped.Bip01_Head1"] = {
         model = "models/props_junk/watermelon01.mdl",
         localAng = Angle(180,110,90),
@@ -43,7 +43,7 @@ adsadaddsa = {
         capScale = Vector(1, 1, 1),
     },
 }
-function gore_mod_bonemerge_client_test(ragdoll,bone_name,model)
+function gore_mod_bonemerge_client_test(ragdoll,bone_name,model) --tentativa de colocar modelos no client
 	local model = ragdoll:GetModel()
 	local capScale = Vector(1, 1, 1)
 	local localAng = Angle(0, 0, 0)
