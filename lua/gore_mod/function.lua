@@ -291,7 +291,6 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 	end
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
-
 	if #limb_ragdoll_count > GetConVar("goremod_sliced_ragdoll_limit"):GetInt() then
 		if IsValid(limb_ragdoll_count[1]) then
             limb_ragdoll_count[1]:Remove()

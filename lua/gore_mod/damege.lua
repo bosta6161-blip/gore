@@ -74,6 +74,6 @@ hook.Add("EntityTakeDamage", "ççp", function(ragdoll, dmginfo)
                     gore_mod_dismember_limb(ragdoll,bone_name,dmg_data) 
                 end
 			end
-		end 
+		end
 	end
 end)

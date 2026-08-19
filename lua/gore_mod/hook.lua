@@ -11,6 +11,8 @@ local function gore_mod_sigma_children_gib(ragdoll,bone_name)
 end
 hook.Add( "noob_gore_gap", "do gib gap", function(ragdoll,model,bone_name)
     if GetConVar("goremod_ragdoll_has_gap_models"):GetBool() then
+        if !ragdoll.aids then ragdoll.aids = {} end
+
         local model = ragdoll:GetModel()
         local capScale = Vector(1, 1, 1)
         local localAng = Angle(0, 0, 0)
