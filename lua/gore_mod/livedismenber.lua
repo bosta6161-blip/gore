@@ -111,13 +111,11 @@ hook.Add("EntityTakeDamage", "LambdaGore_LivingNPCDamage", function(npc, dmginfo
         slice = false 
     }
 
-    if dmg_data.dmg_total_damege <= 0 then return end
-
-    local damagePos = dmginfo:GetDamagePosition()
-
-    if damagePos == vector_origin then
-        damagePos = npc:WorldSpaceCenter()
-    end
+    local defalt_value = npc:GetMaxHealth()/1.6
+    npc.goremod_npc_boneHealth = { --npc bone health
+        ["ValveBiped.Bip01_R_Forearm"] = defalt_value,  
+        ["ValveBiped.Bip01_L_Forearm"] = defalt_value
+    }
 
     local attacker = dmginfo:GetAttacker()
 
@@ -129,13 +127,19 @@ hook.Add("EntityTakeDamage", "LambdaGore_LivingNPCDamage", function(npc, dmginfo
         local boneID = npc:LookupBone(bonename)
         local bonePos = npc:GetBonePosition(boneID)
 
-        if bonePos and bonePos:Distance(damagePos) < 18 then
-            goremod_DoBleed(npc, boneID, attacker)
 
-            hook.Call("noob_gore_gap",nil,npc,npc:GetModel(),bonename) --call the hook to spawn a model in ragdoll
-            hook.Call("noob_gore_make_limb_blood",nil,npc,bonename) -- call this hook to spawn blood efect
-            hook.Call( "noob_gore_make_gore_sound", nil,npc,bone_name) --call this hook to make sound on bone name location
-            destroy_npc_limb(npc, bonename, dmg_data)
+        if bonePos and bonePos:Distance(dmg_data.dmg_pos) < 18 then
+            if npc.goremod_npc_boneHealth[bonename] then
+                npc.goremod_npc_boneHealth[bonename] = npc.goremod_npc_boneHealth[bonename] - dmginfo:GetDamage()
+            end
+            if npc.goremod_npc_boneHealth[bonename] <= 0 then
+                goremod_DoBleed(npc, boneID, attacker)
+
+                hook.Call("noob_gore_gap",nil,npc,npc:GetModel(),bonename) --call the hook to spawn a model in ragdoll
+                hook.Call("noob_gore_make_limb_blood",nil,npc,bonename) -- call this hook to spawn blood efect
+                hook.Call( "noob_gore_make_gore_sound", nil,npc,bone_name) --call this hook to make sound on bone name location
+                destroy_npc_limb(npc, bonename, dmg_data)         
+            end
         end
 	end
 end)
