@@ -1,5 +1,5 @@
 --main options
-CreateConVar("goremod_enable", "1", FCVAR_ARCHIVE, "Disable Noob gore mod.")
+CreateConVar("goremod_enable", "1", FCVAR_ARCHIVE, "Disable Lambda Gore.")
 CreateConVar("goremod_can_gib_only_npc_corpse", "1", FCVAR_ARCHIVE, "Disable gore to only ragdolls spawned by NPCs/nextbots/players.")
 CreateConVar("goremod_can_gib_ragdoll", "1", FCVAR_ARCHIVE, "After you kill the NPC, you can't destroy the body, this can help with performance when there's a lot going on.")
 CreateConVar("goremod_npc_explode_type", "1", FCVAR_ARCHIVE, "goremod_npc_explode_type")
@@ -31,6 +31,13 @@ CreateConVar("goremod_acid_efect_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "goremod_aci
 CreateConVar("goremod_sawblade_slice_EXPEREMENTAL", "0", FCVAR_ARCHIVE, "goremod_sawblade_slice_EXPEREMENTAL")
 CreateConVar("goremod_rd_bridge_enable", "0", FCVAR_ARCHIVE, "Enable gore effects on Ragdoll Death player ragdolls")
 
+-- Live-NPC injury options. These are deliberately opt-in so old setups keep the same behavior.
+CreateConVar("goremod_live_leg_break", "1", FCVAR_ARCHIVE, "Rotate an NPC leg after it takes enough damage.")
+CreateConVar("goremod_live_leg_break_angle", "35", FCVAR_ARCHIVE, "Maximum local rotation used by the live NPC broken-leg pose.")
+CreateConVar("goremod_copy_ragdoll_materials", "1", FCVAR_ARCHIVE, "Copy skin/material/submaterials to dismembered ragdoll limbs.")
+CreateConVar("goremod_client_gap_models", "1", FCVAR_ARCHIVE, "Precache Lambda Gore gap models on the client.")
+CreateConVar("goremod_vortigaunt_gore_model", "0", FCVAR_ARCHIVE, "Use the bundled Vortigaunt gore model as an optional custom gib.")
+
 -- Core ConVars (Server-side, replicated to clients)
 CreateConVar("goremod_blood_stream_reps_multiplier", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Multiplier for blood stream particle count (duration)")
 CreateConVar("goremod_blood_sound_volume", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blood sound volume")
@@ -43,3 +50,13 @@ CreateConVar("goremod_stream_force", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVA
 CreateConVar("goremod_stream_spread", "5", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Spread/FOV angle for blood streams in degrees (0 = straight line, 15 = wide spray)")
 CreateConVar("goremod_stream_density", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Frequency of blood spurts (0.1 = very frequent, 5 = slow/rare)")
 
+
+
+
+-- Live NPC injury settings.
+-- These control when a living NPC gets a visible broken-leg pose.
+CreateConVar("goremod_live_leg_injury", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable progressive leg injuries on living NPCs.")
+CreateConVar("goremod_live_leg_break_damage", "45", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Damage required to break an NPC leg.")
+CreateConVar("goremod_live_leg_break_angle", "35", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Rotation angle applied to a broken NPC leg.")
+CreateConVar("goremod_live_finger_curl_angle", "22", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Rotation applied to finger bones after arm damage.")
+CreateConVar("goremod_client_gap_models", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Precache Lambda Gore gap/gore models on the client.")

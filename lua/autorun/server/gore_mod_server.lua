@@ -1,9 +1,10 @@
 include( "gore_mod/ConVar.lua" )
+include( "gore_mod/npc_customization.lua" )
 
 goremod_explosion_limb_bones = {
     "ValveBiped.Bip01_Head1",
-    "ValveBiped.Bip01_L_Upperarm",
-    "ValveBiped.Bip01_R_Upperarm",
+    "ValveBiped.Bip01_L_UpperArm",
+    "ValveBiped.Bip01_R_UpperArm",
     "ValveBiped.Bip01_L_Thigh",
     "ValveBiped.Bip01_R_Thigh",
 }
@@ -15,7 +16,9 @@ function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
         ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll)
     end
 
+    local radius = 250
     local ratio = 0.67
+    local base_force = 200
 
     for _, bone_name in ipairs(goremod_explosion_limb_bones) do
         local boneID = ragdoll:LookupBone(bone_name)
@@ -25,7 +28,7 @@ function goremod_explosion_dismember_limbs(ragdoll, dmg_data)
             local bonePos = ragdoll:GetBonePosition(boneID)
             local dist = bonePos:Distance(dmg_data.dmg_pos)
 
-            if maxHealth and dist <= 250 and ragdoll.gib_bone[physBone] ~= physBone then
+            if maxHealth and dist <= radius and ragdoll.gib_bone[physBone] ~= physBone then
                 ragdoll.gore_mod_boneHealth[physBone] = maxHealth - dmg_data.dmg_total_damege
 
                 if dmg_data.dmg_total_damege >= (maxHealth * ratio) then
@@ -227,7 +230,15 @@ hook.Add("EntityTakeDamage", "pai_do_reabilitado",function(npc, dmginfo) --gib s
     end
 end)
 hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
-    if GetConVar("goremod_enable"):GetBool() and not owner.is_madness_combat_npc then
+    if owner.is_madness_combat_npc == true then return end
+
+    -- A blacklisted NPC should behave exactly like the original game:
+    -- no gore processing is attached to its corpse.
+    if IsValid(owner) and owner:IsNPC() and goremod_IsNPCBlacklisted(owner) then
+        return
+    end
+
+    if GetConVar("goremod_enable"):GetBool() then
         ragdoll:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         local dmg_data = {
             dmg_type = owner.dmg_type,
@@ -240,13 +251,15 @@ hook.Add("CreateEntityRagdoll", "Replace_shit_Ragdoll", function(owner, ragdoll)
 
         gore_mod_ApplyCorpseEffects(ragdoll)
         goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
+
+
     end
 end)
 
 
 hook.Add("OnEntityCreated", "On_shit_ent_is_created", function(ragdoll)
     if GetConVar("goremod_enable"):GetBool() then 
-		if GetConVar("goremod_can_gib_only_npc_corpse"):GetBool() and ragdoll:GetClass() == "prop_ragdoll" and not ragdoll.is_madness_combat_npc then 
+		if GetConVar("goremod_can_gib_only_npc_corpse"):GetBool() and ragdoll:GetClass() == "prop_ragdoll" then 
 			timer.Simple(0, function()
 				if IsValid(ragdoll) and not ragdoll.destructible_Corpse then
 					gore_mod_ApplyCorpseEffects(ragdoll) 
@@ -255,6 +268,109 @@ hook.Add("OnEntityCreated", "On_shit_ent_is_created", function(ragdoll)
 		end
 	end
 end)
+
+--[[
+    Lambda Gore - LIVE NPC LEG INJURY SYSTEM
+    -----------------------------------------
+    Accumulates damage on the leg that was actually hit. Once the configured
+    threshold is reached, the client receives a networked "broken" state and
+    the animation layer rotates the calf.
+
+    We deliberately check the physics bone first. Some NPCs expose animation
+    bones that have no physics representation; those bones must never be fed
+    into physics APIs.
+]]
+local LambdaGoreLegBoneNames = {
+    left = {
+        "ValveBiped.Bip01_L_Thigh",
+        "ValveBiped.Bip01_L_Calf",
+        "ValveBiped.Bip01_L_Foot",
+    },
+    right = {
+        "ValveBiped.Bip01_R_Thigh",
+        "ValveBiped.Bip01_R_Calf",
+        "ValveBiped.Bip01_R_Foot",
+    },
+}
+
+local function LambdaGoreHasPhysicsBone(npc, boneID)
+    if not IsValid(npc) or boneID == nil or boneID < 0 then return false end
+
+    local physID = npc:TranslateBoneToPhysBone(boneID)
+    if physID == nil or physID < 0 then return false end
+
+    return IsValid(npc:GetPhysicsObjectNum(physID))
+end
+
+local function LambdaGoreFindLeg(npc, hitBoneName)
+    local lower = string.lower(hitBoneName or "")
+    if lower:find("_l_", 1, true) and (lower:find("thigh", 1, true) or lower:find("calf", 1, true) or lower:find("foot", 1, true)) then
+        return "left"
+    end
+    if lower:find("_r_", 1, true) and (lower:find("thigh", 1, true) or lower:find("calf", 1, true) or lower:find("foot", 1, true)) then
+        return "right"
+    end
+end
+
+local function LambdaGoreResolveLegBone(npc, side)
+    for _, name in ipairs(LambdaGoreLegBoneNames[side] or {}) do
+        local id = npc:LookupBone(name)
+        if id and id >= 0 then
+            return id, name
+        end
+    end
+end
+
+hook.Add("EntityTakeDamage", "LambdaGore_LiveNPCInjuries", function(npc, dmginfo)
+    if not GetConVar("goremod_enable"):GetBool() then return end
+    if not GetConVar("goremod_live_leg_injury"):GetBool() then return end
+    if not IsValid(npc) or not npc:IsNPC() or goremod_IsNPCBlacklisted(npc) then return end
+    if dmginfo:GetDamage() <= 0 then return end
+
+    local damagePos = dmginfo:GetDamagePosition()
+    if not damagePos or damagePos == vector_origin then
+        damagePos = npc:GetPos()
+    end
+
+    -- Find the closest valid animation bone. We only consider leg bones.
+    local bestSide, bestDist
+    for side, names in pairs(LambdaGoreLegBoneNames) do
+        for _, boneName in ipairs(names) do
+            local boneID = npc:LookupBone(boneName)
+            if boneID and boneID >= 0 and LambdaGoreHasPhysicsBone(npc, boneID) then
+                local bonePos = npc:GetBonePosition(boneID)
+                if bonePos then
+                    local dist = bonePos:DistToSqr(damagePos)
+                    if not bestDist or dist < bestDist then
+                        bestDist = dist
+                        bestSide = side
+                    end
+                end
+            end
+        end
+    end
+
+    if not bestSide then return end
+
+    npc.LambdaGoreLegDamage = npc.LambdaGoreLegDamage or {left = 0, right = 0}
+    local state = npc.LambdaGoreLegDamage
+    if state[bestSide] >= math.huge then return end
+
+    state[bestSide] = state[bestSide] + dmginfo:GetDamage()
+
+    local threshold = math.max(1, GetConVar("goremod_live_leg_break_damage"):GetFloat())
+    if state[bestSide] >= threshold and not npc:GetNW2Bool("LambdaGore_Broken" .. (bestSide == "left" and "Left" or "Right") .. "Leg", false) then
+        local boneID = LambdaGoreResolveLegBone(npc, bestSide)
+        if boneID and LambdaGoreHasPhysicsBone(npc, boneID) then
+            local suffix = bestSide == "left" and "Left" or "Right"
+            npc:SetNW2Bool("LambdaGore_Broken" .. suffix .. "Leg", true)
+
+            -- Store the original damage for debugging/other addons.
+            npc["LambdaGore_" .. suffix .. "LegDamage"] = state[bestSide]
+        end
+    end
+end)
+
 include( "gore_mod/function.lua" )
 include( "gore_mod/damege.lua" )
 include( "gore_mod/giblist.lua" )

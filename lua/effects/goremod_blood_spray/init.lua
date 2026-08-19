@@ -1,16 +1,3 @@
--- Core ConVars (Server-side, replicated to clients)
-CreateConVar("goremod_blood_stream_reps_multiplier", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Multiplier for blood stream particle count (duration)")
-CreateConVar("goremod_blood_sound_volume", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blood sound volume")
-CreateConVar("goremod_squirt_sound_volume", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Squirt sound volume")
-CreateConVar("goremod_blood_do_decal", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Blood_do_decal")
-
--- NEW ConVars for customization (Server-side, replicated to clients)
-CreateConVar("goremod_stream_size", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Size multiplier for blood streams (0.5 = half, 2 = double)")
-CreateConVar("goremod_stream_force", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Force multiplier for blood streams (supports decimals like 0.5, 1.5, 2.3)")
-CreateConVar("goremod_stream_spread", "5", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Spread/FOV angle for blood streams in degrees (0 = straight line, 15 = wide spray)")
-CreateConVar("goremod_stream_density", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED, FCVAR_NOTIFY}, "Frequency of blood spurts (0.1 = very frequent, 5 = slow/rare)")
-
-
 -- These are kinda ugly, you probably want to change them:
 local particles = {
     "decals/goremod_trail",
@@ -37,14 +24,14 @@ local particle_force = 200
 local particle_pulsate_max_force = 100
 local particle_pulsate_speed_mult = 8
 
-local particle_reps_stream = 300
+local particle_reps_stream = 180
 local particle_reps_burst = 150
 
 local particle_fps = 60
-local particle_lifetime = 8
+local particle_lifetime = 5
 
-local stream_particle_lifetime = 8
-local burst_particle_lifetime = 8
+local stream_particle_lifetime = 5
+local burst_particle_lifetime = 5
 
 -- Decal:
 local decal_scale = 0.2
@@ -175,14 +162,14 @@ function EFFECT:Init(data)
     end
 
     -- Apply reps multiplier to particle count
-    local reps_multiplier = GetConVar("goremod_blood_stream_reps_multiplier"):GetFloat()
-    self.reps = math.floor((particle_reps_stream or 0) * reps_multiplier)
+    local reps_multiplier = math.max(0, GetConVar("goremod_blood_stream_reps_multiplier"):GetFloat())
+    self.reps = math.Clamp(math.floor((particle_reps_stream or 0) * reps_multiplier), 1, 180)
 
     -- Get customizable values as LOCAL variables so they're captured in timer closure
     local size_mult = GetConVar("goremod_stream_size"):GetFloat()
     local force_mult = GetConVar("goremod_stream_force"):GetFloat()
     local spread_angle = GetConVar("goremod_stream_spread"):GetFloat()
-    local density = GetConVar("goremod_stream_density"):GetFloat()
+    local density = math.max(0.1, GetConVar("goremod_stream_density"):GetFloat())
     
     -- NEW: Get bone name for limb multiplier
     local boneName = ""
@@ -197,7 +184,7 @@ function EFFECT:Init(data)
     
     -- Density now controls how often spurts happen (lower = more frequent)
     -- Convert density to delay: density 1 = normal, density 0.1 = very frequent, density 5 = very slow
-    local spurt_delay = math.Rand(0.5, 5) / (particle_fps * density)
+    local spurt_delay = math.Rand(0.75, 2.5) / math.max(1, particle_fps * density)
 
     self.StartTime = CurTime()
     self.CurrentPos = ent:GetPos()
@@ -207,8 +194,11 @@ function EFFECT:Init(data)
     -- Create unique timer name to prevent conflicts in multiplayer
     self.timername = "NextGen4BloodStreamTimer_" .. ent:EntIndex() .. "_" .. CurTime()
     local emitter = ParticleEmitter(self.CurrentPos, false)
-    
-    if not emitter then return end
+
+    if not emitter or self.reps <= 0 then
+        if emitter then emitter:Finish() end
+        return
+    end
 
     -- Play squirt sound
     sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("goremod_squirt_sound_volume"):GetFloat())
@@ -216,15 +206,19 @@ function EFFECT:Init(data)
     -- Store self reference for timer callback
     local effect_self = self
     local reps = self.reps
-    
+    local sound_every = math.max(1, math.floor(reps / 12))
+    local rep_index = 0
+
     timer.Create(self.timername, spurt_delay, reps, function()
         if not IsValid(ent) or not emitter then
             if emitter then emitter:Finish() end
             timer.Remove(effect_self.timername)
             return
         end
-        -- Play squirt sound again
-        sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("goremod_squirt_sound_volume"):GetFloat())
+        rep_index = rep_index + 1
+        if rep_index == 1 or rep_index % sound_every == 0 then
+            sound.Play(table.Random(squrt_sounds), ent:GetPos(), sound_level2, math.Rand(95, 105), GetConVar("goremod_squirt_sound_volume"):GetFloat())
+        end
 
         ent.CurrentPos = ent:GetPos()
 
@@ -296,7 +290,7 @@ function EFFECT:Think()
 
     if timer.Exists(self.timername) then
         local lifetime = CurTime() - self.StartTime
-        local dietime = self.reps * (1 / particle_fps)
+        local dietime = math.max(0.05, self.reps * (1 / particle_fps))
         self.CurrentStrenght = math.Clamp(1 - (lifetime / dietime) * (1 - min_strenght), 0, 1)
 
         self:UpdateExtraForce()
@@ -308,9 +302,3 @@ end
 
 function EFFECT:Render() end
 
--- Cleanup timers on effect removal for multiplayer stability
-hook.Add("EntityRemoved", "NextGen4BloodStream_Cleanup", function(ent)
-    if ent.nextgen4_bloodstream_timer then
-        timer.Remove(ent.nextgen4_bloodstream_timer)
-    end
-end)

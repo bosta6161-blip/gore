@@ -63,7 +63,7 @@ hook.Add("CreateEntityRagdoll", "GoreMod_ApplyToPlayerRagdoll", function(owner, 
             is_player = true,
             slice = false 
         }
-        gore_mod_ApplyCorpseEffects(ragdoll)
+
         goremod_do_ragdoll_gib_on_deafh(ragdoll,owner,dmg_data)
         goremod_player_death_info[owner] = nil
     end

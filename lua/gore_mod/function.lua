@@ -32,45 +32,59 @@ function gore_mod_GetClosestPhysBone_on_ragdoll(ragdoll,pos)
 		ragdoll.goremod_bone_to_ignore = {} 
 	end
 	for i=0, ragdoll:GetPhysicsObjectCount()-1 do
-		local bone = ragdoll:TranslatePhysBoneToBone(i)
-		
-		if bone and ragdoll.gib_bone[i] ~= i or ragdoll.goremod_bone_to_ignore[bone] ~= bone then 
-			local phys = ragdoll:GetPhysicsObjectNum(i)
-			
-			if IsValid(phys) and pos then
-				local distance = phys:GetPos():Distance(pos)
-				
-				if (distance < closest_distance || closest_distance == -1) then
-					closest_distance = distance
-					closest_bone = i
-				end
-			end
-		end
-	end
+        local bone = ragdoll:TranslatePhysBoneToBone(i)
+
+        -- Ignore invalid, already removed and explicitly ignored physics bones.
+        local alreadyGibbed = ragdoll.gib_bone[i] == i
+        local ignored = bone and ragdoll.goremod_bone_to_ignore[bone] == bone
+
+        if bone and not alreadyGibbed and not ignored then
+            local phys = ragdoll:GetPhysicsObjectNum(i)
+
+            if IsValid(phys) and pos then
+                local distance = phys:GetPos():Distance(pos)
+
+                if distance < closest_distance or closest_distance == -1 then
+                    closest_distance = distance
+                    closest_bone = i
+                end
+            end
+        end
+    end
 	return closest_bone
 end
 function gore_mod_colideBone(ragdoll,phys_bone)
-	local colide = ragdoll:GetPhysicsObjectNum( phys_bone ) --get bone id
-	colide:EnableCollisions(false)
-	colide:SetMass(0)
-	colide:EnableDrag(false )
-	colide:SetMaterial("gmod_silent")
-	colide:Sleep()
-	colide:EnableMotion(false)
-	colide:SetBuoyancyRatio(0)
-	colide:AddGameFlag(1024) 
-	colide:EnableGravity(false)
+    -- Physics objects are not guaranteed to exist for every animation bone.
+    local colide = ragdoll:GetPhysicsObjectNum(phys_bone)
+    if not IsValid(colide) then return false end
+
+    colide:EnableCollisions(false)
+    colide:SetMass(0)
+    colide:EnableDrag(false)
+    colide:SetMaterial("gmod_silent")
+    colide:Sleep()
+    colide:EnableMotion(false)
+    colide:SetBuoyancyRatio(0)
+    colide:AddGameFlag(1024)
+    colide:EnableGravity(false)
+    return true
 end
+
 function gore_mod_gib_PhysBone(ragdoll,bone_name,dmg_data)
     if ragdoll:LookupBone(bone_name) == nil or ragdoll:LookupBone(bone_name) == 0 then return end
     if !ragdoll.gib_bone then ragdoll.gib_bone = {} table.insert(gib_PhysBone_RAGDOLLS, ragdoll) end
 
-    local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+    local bone_id = ragdoll:LookupBone(bone_name) -- get animation bone id
+    if bone_id == nil or bone_id < 0 then return end
 
-	ragdoll:ManipulateBoneScale(bone_id,Vector(0,0,0)) --scale the bone
+    ragdoll:ManipulateBoneScale(bone_id, Vector(0, 0, 0))
+
     local PhysBone = ragdoll:TranslateBoneToPhysBone(bone_id)
+    if PhysBone == nil or PhysBone < 0 then return end
+
     local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
-			
+    if not IsValid(ObjectNum) then return end
+
 	if dmg_data.slice == false and ragdoll.gib_bone[PhysBone] ~= PhysBone then
 		hook.Call( "noob_gore_on_gib_destroid", nil,ragdoll,bone_name,dmg_data) --call this hook to make gibs based on bone name
 	end
@@ -133,17 +147,33 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
     if IsValid(ragdollGIB) and IsValid(ragdoll) and ragdoll.gib_bone[PhysBone] ~= PhysBone and ragdoll.bonegap_for_limb[bone_id] ~= bone_id then
     	ragdollGIB:SetModel(ragdoll:GetModel())
     	ragdollGIB:SetPos(ragdoll:GetPos()) 
-        ragdollGIB:SetSkin( ragdoll:GetSkin() )
-		ragdollGIB:SetColor(ragdoll:GetColor())
-    	ragdollGIB:Spawn()
+        ragdollGIB:SetSkin(ragdoll:GetSkin())
+        ragdollGIB:SetColor(ragdoll:GetColor())
+        ragdollGIB:Spawn()
+
+        -- Preserve the exact visual appearance of the source ragdoll.
+        -- This includes the "face" texture/submaterials on custom NPCs.
+        if GetConVar("goremod_copy_ragdoll_materials"):GetBool() then
+            ragdollGIB:SetMaterial(ragdoll:GetMaterial())
+            ragdollGIB:SetRenderMode(ragdoll:GetRenderMode())
+            ragdollGIB:SetRenderFX(ragdoll:GetRenderFX())
+
+            for materialIndex = 0, ragdoll:GetNumSubMaterials() - 1 do
+                local material = ragdoll:GetSubMaterial(materialIndex)
+                if material and material ~= "" then
+                    ragdollGIB:SetSubMaterial(materialIndex, material)
+                end
+            end
+        end
 
 		if GetConVar("goremod_Disable_ragdoll_colision"):GetBool() then
 			ragdollGIB:SetCollisionGroup(COLLISION_GROUP_WEAPON)
         end
 
-		for i = 1, #ragdoll:GetBodyGroups() do
-			ragdollGIB:SetBodygroup(i, ragdoll:GetBodygroup(i))
-		end
+        for _, group in ipairs(ragdoll:GetBodyGroups()) do
+            local groupID = group.id
+            ragdollGIB:SetBodygroup(groupID, ragdoll:GetBodygroup(groupID))
+        end
 
 		gore_mod_slice_gib(ragdollGIB,bone_name)
 		gore_mod_sigma_scale(ragdollGIB)
@@ -170,8 +200,10 @@ function gore_mod_decap_ragdoll(ragdoll,bone_name,dmg_data)
 
 		if dmg_data then
 			local PhysBone = ragdollGIB:TranslateBoneToPhysBone(bone_id)
-			local PhysicsObject = ragdollGIB:GetPhysicsObjectNum( PhysBone )
-			PhysicsObject:AddVelocity(dmg_data.dmg_force/18 )	
+            local PhysicsObject = ragdollGIB:GetPhysicsObjectNum(PhysBone)
+            if IsValid(PhysicsObject) then
+                PhysicsObject:AddVelocity(dmg_data.dmg_force / 18)
+            end	
 		end
 		ragdollGIB.gib_bone = {}
 		if ragdoll.bonegap_for_limb then
@@ -238,10 +270,10 @@ end
 function gore_mod_sigma_children(ragdoll,bone_id)
 	local sigma = ragdoll:GetChildBones(bone_id)
     for k, v in pairs(sigma) do --no more shit code
-		local PhysBone = ragdoll:TranslateBoneToPhysBone(v)
-		local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
-				
-		if ObjectNum:IsValid() then --check if the object is valid
+        local PhysBone = ragdoll:TranslateBoneToPhysBone(v)
+        local ObjectNum = ragdoll:GetPhysicsObjectNum(PhysBone)
+
+        if IsValid(ObjectNum) then
 			ragdoll.slice_gib[v] = v
 			gore_mod_sigma_children(ragdoll,v)
 		end
@@ -256,25 +288,23 @@ function gore_mod_sigma_scale(ragdoll)
 	end
 end
 timer.Create( "limb_bone_timer",0.1, 0, function() 
-    for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
-		if not ragdoll:IsValid() then
-			table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
-		end
-		if ragdoll.slice_gib then
-			gore_mod_ForcePhysBonePos2(ragdoll) 
-		end
-	end
-end )
+    for _, ragdoll in ipairs(gib_PhysBone_RAGDOLLS) do
+        if not IsValid(ragdoll) then
+            table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll)
+        elseif ragdoll.slice_gib then
+            gore_mod_ForcePhysBonePos2(ragdoll)
+        end
+    end
+end)
 
 hook.Add("Think", "ForcePhysbonePositions_Think_sigma", function()
-    for _,ragdoll in ipairs( gib_PhysBone_RAGDOLLS ) do
-		if not ragdoll:IsValid() then
-			table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll) --remove ragdoll on the table
-		end
-		if ragdoll.gib_bone then
-			gore_mod_ForcePhysBonePos(ragdoll) 
-		end
-	end
+    for _, ragdoll in ipairs(gib_PhysBone_RAGDOLLS) do
+        if not IsValid(ragdoll) then
+            table.RemoveByValue(gib_PhysBone_RAGDOLLS, ragdoll)
+        elseif ragdoll.gib_bone then
+            gore_mod_ForcePhysBonePos(ragdoll)
+        end
+    end
 end)
 
 function gore_mod_ForcePhysBonePos(ragdoll)
@@ -283,14 +313,13 @@ function gore_mod_ForcePhysBonePos(ragdoll)
 			local bone_parent = ragdoll:TranslateBoneToPhysBone(ragdoll:GetBoneParent(ragdoll:TranslatePhysBoneToBone(bone)))
 			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(bone)
 			local parent_physobj = ragdoll:GetPhysicsObjectNum(bone_parent)
-			if parent_physobj ~= nil then
-				gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
-				gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
-			end
+			gibbed_physobj:SetPos( parent_physobj:GetPos(),true)
+			gibbed_physobj:SetAngles( parent_physobj:GetAngles() )
 		end
 	end
 end
 function gore_mod_ForcePhysBonePos2(ragdoll)
+
 	if #limb_ragdoll_count > GetConVar("goremod_sliced_ragdoll_limit"):GetInt() then
 		if IsValid(limb_ragdoll_count[1]) then
             limb_ragdoll_count[1]:Remove()
@@ -308,9 +337,11 @@ function gore_mod_ForcePhysBonePos2(ragdoll)
 
 			local main_bone = ragdoll:TranslateBoneToPhysBone(ragdoll.main_bone_sigma)
 		
-			local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
-			local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone) 
-			gibbed_physobj:SetPos( parent_physobj:GetPos()+Vector( 0, 0,70),true)
+            local gibbed_physobj = ragdoll:GetPhysicsObjectNum(i)
+            local parent_physobj = ragdoll:GetPhysicsObjectNum(main_bone)
+            if IsValid(gibbed_physobj) and IsValid(parent_physobj) then
+                gibbed_physobj:SetPos(parent_physobj:GetPos() + Vector(0, 0, 70), true)
+            end
 		end
 	end
 end
@@ -406,8 +437,7 @@ concommand.Add( "ngm_debug_print_ragdoll_table", function( ply, cmd, args )
     PrintTable(gib_PhysBone_RAGDOLLS)
 end )
 function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
-	if ragdoll:LookupBone(bone_name) ~= 0 then
-		local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
+	local bone_id = ragdoll:LookupBone(bone_name) --get bone id from bone name
 		if !ragdoll.bonegap_for_limb then
 			ragdoll.bonegap_for_limb = {}
 		end
@@ -423,7 +453,7 @@ function gore_mod_dismember_limb(ragdoll,bone_name,dmg_data)
 		hook.Call( "noob_gore_gap", nil,ragdoll,ragdoll:GetModel(),bone_name) --call this hook to make cap based on bone name
 		hook.Call( "noob_gore_make_gore_sound", nil,ragdoll,bone_name) --call this hook to make sound on bone name
 		hook.Call( "noob_gore_make_limb_blood", nil,ragdoll,bone_name) --call this hook to make blood on bone name
-	end
+
 end
 
 function gore_mod_ApplyCorpseEffects(ragdoll)
@@ -436,8 +466,11 @@ function gore_mod_ApplyCorpseEffects(ragdoll)
 	ragdoll.destructible_Corpse = true
     ragdoll.gore_mod_boneHealth = {}
 	ragdoll.gib_start_delay = CurTime() + 1
-    for i = 0, ragdoll:GetPhysicsObjectCount()-1 do
-        ragdoll.gore_mod_boneHealth[i] = ragdoll:GetPhysicsObjectNum(i):GetSurfaceArea()*0.25 * (( i == 0 && root_health_mult ) or health_mult)
+    for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+        local phys = ragdoll:GetPhysicsObjectNum(i)
+        if IsValid(phys) then
+            ragdoll.gore_mod_boneHealth[i] = phys:GetSurfaceArea() * 0.25 * ((i == 0 and root_health_mult) or health_mult)
+        end
     end
 	local surfaceProp = ragdoll:GetBoneSurfaceProp(0)
 	if surfaceProp == "alienflesh" or surfaceProp == "antlion" or surfaceProp == "zombieflesh" then

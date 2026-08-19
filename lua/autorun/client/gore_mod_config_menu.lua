@@ -1,3 +1,30 @@
+-- Client copy of the server-authoritative NPC blacklist.
+LambdaGoreNPCBlacklist = LambdaGoreNPCBlacklist or {}
+
+net.Receive("LambdaGore_BlacklistSync", function()
+    LambdaGoreNPCBlacklist = {}
+
+    local count = net.ReadUInt(16)
+    for _ = 1, count do
+        LambdaGoreNPCBlacklist[net.ReadString()] = true
+    end
+
+    if IsValid(LambdaGoreNPCBlacklistView) then
+        LambdaGoreNPCBlacklistView:Refresh()
+    end
+end)
+
+local function LambdaGore_SendBlacklistAction(action, model)
+    net.Start("LambdaGore_BlacklistAction")
+        net.WriteString(action)
+        net.WriteString(model or "")
+    net.SendToServer()
+end
+
+concommand.Add("lambda_gore_blacklist_sync", function()
+    LambdaGore_SendBlacklistAction("request", "")
+end)
+
 
 
 surface.CreateFont( "smash", {
@@ -95,7 +122,7 @@ function GoremodOpenConfirmMenu()
         gore_mod_Add_label(content,name)
         if name == "General" then
             gore_mod_Add_CheckBox(content,"gore is enable!","goremod_enable")
-            gore_mod_Add_label(content,"Disable Noob gore mod.",true)
+            gore_mod_Add_label(content,"Disable Lambda Gore.",true)
             gore_mod_Add_CheckBox(content,"Can destroy map ragdoll!","goremod_can_gib_only_npc_corpse")
             gore_mod_Add_label(content,"Disable gore to only ragdolls spawned by NPCs/nextbots/players.",true)
             gore_mod_Add_CheckBox(content,"can destroy bodies","goremod_can_gib_ragdoll")
@@ -149,6 +176,11 @@ function GoremodOpenConfirmMenu()
                 RunConsoleCommand("goremod_acid_efect_EXPEREMENTAL", "0")
                 RunConsoleCommand("goremod_sawblade_slice_EXPEREMENTAL", "0")
                 RunConsoleCommand("goremod_rd_bridge_enable", "0")
+                RunConsoleCommand("goremod_live_leg_break", "1")
+                RunConsoleCommand("goremod_live_leg_break_angle", "35")
+                RunConsoleCommand("goremod_copy_ragdoll_materials", "1")
+                RunConsoleCommand("goremod_client_gap_models", "1")
+                RunConsoleCommand("goremod_vortigaunt_gore_model", "0")
 
                 -- Core ConVars (Server-side, replicated to clients)
                 RunConsoleCommand("goremod_blood_stream_reps_multiplier", "1")
@@ -167,9 +199,117 @@ function GoremodOpenConfirmMenu()
                 surface.PlaySound("garrysmod/save_load"..math.random(1,3)..".wav")
                 --surface.PlaySound("buttons/button15.wav")
             end
+        elseif name == "NPC Blacklist" then
+            gore_mod_Add_label(content, "Blacklist NPC models")
+            gore_mod_Add_label(content, "Blacklisted models are skipped by live dismemberment and corpse gore.", true)
+
+            local entry = vgui.Create("DTextEntry", content)
+            entry:Dock(TOP)
+            entry:DockMargin(20, 8, 20, 4)
+            entry:SetTall(34)
+            entry:SetPlaceholderText("models/example/npc.mdl")
+
+            local add = vgui.Create("DButton", content)
+            add:Dock(TOP)
+            add:DockMargin(20, 4, 20, 4)
+            add:SetTall(34)
+            add:SetText("Adicionar modelo à lista negra")
+            add.DoClick = function()
+                local model = string.Trim(string.lower(entry:GetValue() or ""))
+                if model ~= "" then
+                    LambdaGore_SendBlacklistAction("add", model)
+                    entry:SetText("")
+                    timer.Simple(0.1, function()
+                        LambdaGore_SendBlacklistAction("request", "")
+                    end)
+                end
+            end
+
+            local addTarget = vgui.Create("DButton", content)
+            addTarget:Dock(TOP)
+            addTarget:DockMargin(20, 4, 20, 8)
+            addTarget:SetTall(34)
+            addTarget:SetText("Adicionar NPC que estou mirando")
+            addTarget.DoClick = function()
+                local tr = LocalPlayer():GetEyeTrace()
+                if IsValid(tr.Entity) and tr.Entity:IsNPC() then
+                    LambdaGore_SendBlacklistAction("add", tr.Entity:GetModel())
+                    timer.Simple(0.1, function()
+                        LambdaGore_SendBlacklistAction("request", "")
+                    end)
+                else
+                    notification.AddLegacy("Mire em um NPC.", NOTIFY_ERROR, 3)
+                end
+            end
+
+            local list = vgui.Create("DListView", content)
+            list:Dock(FILL)
+            list:DockMargin(20, 4, 20, 8)
+            list:AddColumn("Modelo")
+            list:SetMultiSelect(false)
+            LambdaGoreNPCBlacklistView = list
+
+            function list:Refresh()
+                self:Clear()
+                for model in pairs(LambdaGoreNPCBlacklist) do
+                    self:AddLine(model)
+                end
+            end
+
+            local remove = vgui.Create("DButton", content)
+            remove:Dock(BOTTOM)
+            remove:DockMargin(20, 4, 20, 4)
+            remove:SetTall(34)
+            remove:SetText("Remover selecionado")
+            remove.DoClick = function()
+                local line = list:GetSelectedLine()
+                if not line then return end
+
+                local row = list:GetLine(line)
+                if not IsValid(row) then return end
+
+                LambdaGore_SendBlacklistAction("remove", row:GetValue(1))
+                timer.Simple(0.1, function()
+                    LambdaGore_SendBlacklistAction("request", "")
+                end)
+            end
+
+            local clear = vgui.Create("DButton", content)
+            clear:Dock(BOTTOM)
+            clear:DockMargin(20, 4, 20, 4)
+            clear:SetTall(34)
+            clear:SetText("Limpar lista negra")
+            clear.DoClick = function()
+                Derma_Query(
+                    "Remover todos os modelos da lista negra?",
+                    "Lambda Gore",
+                    "Sim", function()
+                        LambdaGore_SendBlacklistAction("clear", "")
+                        timer.Simple(0.1, function()
+                            LambdaGore_SendBlacklistAction("request", "")
+                        end)
+                    end,
+                    "Cancelar"
+                )
+            end
+
+            list:Refresh()
+            LambdaGore_SendBlacklistAction("request", "")
         elseif name == "experimental" then
             gore_mod_Add_CheckBox(content,"dismember living NPC","goremod_live_dismenber_EXPEREMENTAL")
             gore_mod_Add_label(content,"NPC can lose limbs in combat.",true)
+            gore_mod_Add_CheckBox(content,"broken leg pose","goremod_live_leg_injury")
+            gore_mod_Add_label(content,"Rotate the calf when a live NPC takes enough leg damage.",true)
+            gore_mod_Add_slider(content,"broken leg angle","goremod_live_leg_break_angle",0,90,true)
+            gore_mod_Add_label(content,"Maximum visible rotation of the injured leg.",true)
+            gore_mod_Add_slider(content,"leg break damage","goremod_live_leg_break_damage",1,200,true)
+            gore_mod_Add_label(content,"Accumulated damage needed to break a leg.",true)
+            gore_mod_Add_slider(content,"finger curl angle","goremod_live_finger_curl_angle",0,90,true)
+            gore_mod_Add_label(content,"Rotation applied to finger/thumb bones after arm damage.",true)
+            gore_mod_Add_CheckBox(content,"copy ragdoll materials","goremod_client_gap_models")
+            gore_mod_Add_label(content,"Keep skin, face and submaterials on detached limbs.",true)
+            gore_mod_Add_CheckBox(content,"Vortigaunt custom gore model","goremod_vortigaunt_gore_model")
+            gore_mod_Add_label(content,"Optional bundled Vortigaunt-specific gore model.",true)
             gore_mod_Add_CheckBox(content,"burned corpse effect","goremod_burned_corpse_effect_EXPEREMENTAL")
             gore_mod_Add_label(content,"Replace the NPC model when it dies from a burn.",true)
             gore_mod_Add_CheckBox(content,"dissolve efect","goremod_dissolve_efect_EXPEREMENTAL")
@@ -227,6 +367,7 @@ function GoremodOpenConfirmMenu()
         "Ragdoll Option",
         "Gib Option",
         "Blood Option",
+        "NPC Blacklist",
         "experimental",
 
     }
@@ -253,7 +394,7 @@ concommand.Add("goremod_OpenConfirmMenu", function()
 end)
 
 hook.Add( "PopulateToolMenu", "Add_Goremod_Settings", function()
-    spawnmenu.AddToolMenuOption("Options", "Gore", "Noob gore mod 2", "Noob gore mod 2", "", "", function(panel)
+    spawnmenu.AddToolMenuOption("Options", "Gore", "Lambda Gore 2", "Lambda Gore 2", "", "", function(panel)
         panel:Clear()
 
         local OpenConfirmMenu = vgui.Create("DButton", panel)

@@ -85,6 +85,22 @@ bone_name_togap = {
         model = "models/noob_dev2323/gib/l4d/upper_legr.mdl"
     },
 }
+-- Optional NPC-specific gib overrides.
+-- Add another model below without touching the generic gore table.
+goremod_npc_specific_gibs = {
+    ["models/vortigaunt.mdl"] = {
+        ["ValveBiped.Bip01_Head1"] = {
+            { model = "models/noob_dev2323/gib/l4d/vortigount.mdl", count = 1 }
+        },
+    },
+    -- Also accept the common Vortigaunt player/NPC variant if an addon uses it.
+    ["models/vortigaunt_classic.mdl"] = {
+        ["ValveBiped.Bip01_Head1"] = {
+            { model = "models/noob_dev2323/gib/l4d/vortigount.mdl", count = 1 }
+        },
+    },
+}
+
 goremod_CustomGibs = {
     ["ValveBiped.Bip01_Head1"] = {
         gibs = {
@@ -251,6 +267,25 @@ bone_name_togaplimb = {
     ["ValveBiped.Bip01_Spine2"] = "models/noob_dev2323/gib/l4d/half2.mdl",
 	["ValveBiped.Bip01_Head1"] = "models/noob_dev2323/gib/l4d/headcap.mdl"
 } 
+
+-- Optional model-specific gib definitions.
+-- Keep this table empty by default so existing NPCs are unchanged.
+-- Example:
+-- goremod_npc_specific_gibs["models/vortigaunt.mdl"] = {
+--     ["ValveBiped.Bip01_Head1"] = {
+--         { model = "models/noob_dev2323/gib/l4d/vortigount.mdl" }
+--     }
+-- }
+goremod_npc_specific_gibs = goremod_npc_specific_gibs or {}
+
+-- Bundled example requested for the Vortigaunt. It is disabled by default
+-- because this is a whole gore model and should only be used when desired.
+goremod_npc_specific_gibs["models/vortigaunt.mdl"] = {
+    ["ValveBiped.Bip01_Head1"] = {
+        { model = "models/noob_dev2323/gib/l4d/vortigount.mdl" }
+    }
+}
+
 BasicGib_Models = { 
     "models/mosi/fnv/props/gore/insectbit01.mdl", 
     "models/mosi/fnv/props/gore/insectbit02.mdl",
